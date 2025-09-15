@@ -1,0 +1,119 @@
+import argparse
+import os
+import torch
+from exp.exp_anomaly import Exp_Anomaly
+
+parser = argparse.ArgumentParser(description='PatchTST for Anomaly Detection')
+
+# 基本配置
+parser.add_argument('--model', type=str, default='PatchTST', help='model name')
+parser.add_argument('--is_training', type=int, default=1, help='status')
+parser.add_argument('--train_only', type=bool, default=False, help='perform training only')
+parser.add_argument('--test_only', type=bool, default=False, help='perform testing only')
+
+# 数据加载器参数
+parser.add_argument('--data', type=str, default='custom', help='dataset type')
+parser.add_argument('--root_path', type=str, default='./dataset/ALLcontact_noSegment/', help='root path of the data file')
+parser.add_argument('--data_path', type=str, default='./dataset/ALLcontact_noSegment/', help='data file')
+parser.add_argument('--features', type=str, default='M', help='forecasting task, options:[M, S, MS]; M:multivariate, S:univariate')
+parser.add_argument('--target', type=str, default='OT', help='target feature in S or MS task')
+parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
+
+# 异常检测参数
+parser.add_argument('--win_size', type=int, default=100, help='window size for anomaly detection')
+parser.add_argument('--step', type=int, default=1, help='step size for sliding window')
+parser.add_argument('--anormly_ratio', type=float, default=5.0, help='anomaly ratio used for threshold')
+
+# 模型参数
+parser.add_argument('--seq_len', type=int, default=100, help='input sequence length')
+parser.add_argument('--label_len', type=int, default=0, help='start token length')
+parser.add_argument('--pred_len', type=int, default=100, help='prediction sequence length, for reconstruction')
+parser.add_argument('--enc_in', type=int, default=27, help='encoder input size') # 数据集有27个特征
+parser.add_argument('--d_model', type=int, default=256, help='dimension of model')
+parser.add_argument('--n_heads', type=int, default=8, help='num of heads')
+parser.add_argument('--e_layers', type=int, default=3, help='num of encoder layers')
+parser.add_argument('--d_ff', type=int, default=512, help='dimension of fcn')
+parser.add_argument('--patch_len', type=int, default=16, help='patch length')
+parser.add_argument('--stride', type=int, default=8, help='stride')
+parser.add_argument('--padding_patch', default='end', help='None: None; end: padding on the end')
+parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
+parser.add_argument('--fc_dropout', type=float, default=0.1, help='fully connected dropout')
+parser.add_argument('--head_dropout', type=float, default=0.0, help='head dropout')
+parser.add_argument('--embed', type=str, default='timeF', help='time features encoding, options:[timeF, fixed, learned]')
+parser.add_argument('--activation', type=str, default='gelu', help='activation')
+parser.add_argument('--output_attention', action='store_true', help='whether to output attention in encoder')
+parser.add_argument('--do_predict', action='store_true', help='whether to predict unseen future data')
+parser.add_argument('--individual', action='store_true', default=False, help='individual parameters for each variate')
+parser.add_argument('--decomposition', action='store_true', help='decomposition')
+parser.add_argument('--kernel_size', type=int, default=25, help='for decomposition')
+
+# 优化器参数
+parser.add_argument('--batch_size', type=int, default=128, help='batch size')
+parser.add_argument('--learning_rate', type=float, default=0.001, help='optimizer learning rate')
+parser.add_argument('--des', type=str, default='test', help='exp description')
+parser.add_argument('--loss', type=str, default='mse', help='loss function')
+parser.add_argument('--lradj', type=str, default='type1', help='adjust learning rate')
+parser.add_argument('--pct_start', type=float, default=0.3, help='pct_start')
+parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training')
+
+# 训练参数
+parser.add_argument('--train_epochs', type=int, default=10, help='train epochs')
+parser.add_argument('--patience', type=int, default=5, help='early stopping patience')
+parser.add_argument('--use_gpu', type=bool, default=True, help='use gpu')
+parser.add_argument('--gpu', type=int, default=0, help='gpu device id')
+parser.add_argument('--use_multi_gpu', action='store_true', help='use multiple gpus')
+parser.add_argument('--devices', type=str, default='0,1,2,3', help='device ids of multile gpus')
+
+# 实验参数
+parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
+parser.add_argument('--inverse', action='store_true', help='inverse output data', default=False)
+
+# 其他
+parser.add_argument('--revin', action='store_true', default=True, help='RevIN')
+parser.add_argument('--affine', action='store_true', default=True, help='RevIN-affine')
+parser.add_argument('--subtract_last', action='store_true', default=False, help='subtract_last')
+
+args = parser.parse_args()
+
+args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
+
+if args.use_gpu and args.use_multi_gpu:
+    args.devices = args.devices.replace(' ', '')
+    device_ids = args.devices.split(',')
+    args.device_ids = [int(id_) for id_ in device_ids]
+    args.gpu = args.device_ids[0]
+
+# 配置实验名称和设置
+data_parser = {
+    'custom': {'data': 'custom', 'root_path': args.root_path, 'data_path': args.data_path}
+}
+
+if args.data in data_parser.keys():
+    data_info = data_parser[args.data]
+    args.data_path = data_info['data_path']
+    args.root_path = data_info['root_path']
+
+args.setting = '{}_{}_{}'.format(args.model, args.data, args.des)
+
+print('Args in experiment:')
+print(args)
+
+# 运行实验
+Exp = Exp_Anomaly
+
+if args.is_training:
+    exp = Exp(args)  # 创建实验
+    
+    print('>>>>>>>start training>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    exp.train(args.setting)  # 训练模型
+    
+    if not args.train_only:
+        print('>>>>>>>testing<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+        exp.test(args.setting)  # 测试模型
+
+if args.test_only:
+    exp = Exp(args)  # 创建实验
+    print('>>>>>>>testing<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+    exp.test(args.setting, test=1)  # 仅测试模型
+
+print("Experiment finished")
