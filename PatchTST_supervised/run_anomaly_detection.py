@@ -21,14 +21,14 @@ parser.add_argument('--freq', type=str, default='h', help='freq for time feature
 parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
 
 # 异常检测参数
-parser.add_argument('--win_size', type=int, default=100, help='window size for anomaly detection')
+parser.add_argument('--win_size', type=int, default=500, help='window size for anomaly detection')
 parser.add_argument('--step', type=int, default=1, help='step size for sliding window')
 parser.add_argument('--anormly_ratio', type=float, default=5.0, help='anomaly ratio used for threshold')
 
 # 模型参数
-parser.add_argument('--seq_len', type=int, default=100, help='input sequence length')
+parser.add_argument('--seq_len', type=int, default=500, help='input sequence length')
 parser.add_argument('--label_len', type=int, default=0, help='start token length')
-parser.add_argument('--pred_len', type=int, default=100, help='prediction sequence length, for reconstruction')
+parser.add_argument('--pred_len', type=int, default=500, help='prediction sequence length, for reconstruction')
 parser.add_argument('--enc_in', type=int, default=27, help='encoder input size') # 数据集有27个特征
 parser.add_argument('--dec_in', type=int, default=27, help='decoder input size')
 parser.add_argument('--c_out', type=int, default=27, help='output size')
@@ -65,7 +65,7 @@ parser.add_argument('--pct_start', type=float, default=0.3, help='pct_start')
 parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training')
 
 # 训练参数
-parser.add_argument('--train_epochs', type=int, default=10, help='train epochs')
+parser.add_argument('--train_epochs', type=int, default=1, help='train epochs')
 parser.add_argument('--patience', type=int, default=5, help='early stopping patience')
 parser.add_argument('--use_gpu', type=bool, default=True, help='use gpu')
 parser.add_argument('--gpu', type=int, default=0, help='gpu device id')

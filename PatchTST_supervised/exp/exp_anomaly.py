@@ -239,79 +239,88 @@ class Exp_Anomaly(Exp_Basic):
         
         train_scores = np.concatenate(train_scores, axis=0)
         
-        # 2. 计算测试集的重建误差和收集标签
-        test_scores = []
-        test_labels = []
-        test_predictions = []
+        # 2. 计算测试集的重建误差和收集标签 - 逐点评估
+        point_scores = []
+        point_labels = []
         
         with torch.no_grad():
             for i, (batch_x, batch_y) in enumerate(test_loader):
                 outputs, batch_x = self._process_one_batch(batch_x)
-                # 计算每个样本的重建误差
-                score = torch.mean(criterion(outputs, batch_x), dim=(1, 2))
-                test_scores.append(score.detach().cpu().numpy())
-                # 收集标签 - 如果窗口内有任何异常点，则标记为异常
-                labels = np.max(batch_y.numpy(), axis=1)
-                test_labels.append(labels)
+                # 计算每个时间点的重建误差
+                errors = criterion(outputs, batch_x)  # [batch_size, seq_len, n_features]
+                
+                # 对特征维度取平均，保留时间点维度
+                point_error = torch.mean(errors, dim=2)  # [batch_size, seq_len]
+                
+                # 收集每个时间点的标签和分数
+                for b in range(batch_y.shape[0]):  # 遍历每个样本
+                    point_scores.append(point_error[b].detach().cpu().numpy())
+                    point_labels.append(batch_y[b].numpy())
                 
                 # 保存一些重建结果进行可视化
                 if i % 20 == 0:
                     input_np = batch_x.detach().cpu().numpy()
                     output_np = outputs.detach().cpu().numpy()
+                    # 获取当前批次的标签
+                    current_labels = batch_y[0].numpy()  # 第一个样本的所有时间点标签
+                    has_anomaly = np.any(current_labels == 1)
+                    
                     # 选择第一个样本的第一个特征进行可视化
                     plt.figure(figsize=(10, 5))
                     plt.plot(input_np[0, :, 0], label='Input')
                     plt.plot(output_np[0, :, 0], label='Reconstruction')
                     plt.legend()
-                    plt.title(f'Sample {i}, Label: {labels[0]}')
+                    plt.title(f'Sample {i}, Contains Anomaly: {has_anomaly}')
                     plt.savefig(os.path.join(folder_path, f'recon_sample_{i}.png'))
                     plt.close()
         
-        test_scores = np.concatenate(test_scores, axis=0)
-        test_labels = np.concatenate(test_labels, axis=0)
+        # 将所有批次的点级结果合并
+        point_scores = np.concatenate(point_scores, axis=0)
+        point_labels = np.concatenate(point_labels, axis=0)
         
         # 3. 根据异常率确定阈值
         # 根据经验值确定阈值，例如使用训练数据得分的95%分位数
         threshold = np.percentile(train_scores, 100 - self.args.anormly_ratio)
         print(f"Threshold based on {100 - self.args.anormly_ratio}% percentile: {threshold}")
         
-        # 4. 基于阈值生成预测
-        predictions = (test_scores > threshold).astype(int)
+        # 4. 基于阈值生成逐点预测
+        point_predictions = (point_scores > threshold).astype(int)
         
-        # 5. 计算原始评估指标
-        accuracy = accuracy_score(test_labels, predictions)
-        precision, recall, f1, _ = precision_recall_fscore_support(test_labels, predictions, average='binary')
+        # 5. 计算逐点评估指标
+        accuracy = accuracy_score(point_labels, point_predictions)
+        precision, recall, f1, _ = precision_recall_fscore_support(point_labels, point_predictions, average='binary')
         try:
-            auc = roc_auc_score(test_labels, test_scores)
+            auc = roc_auc_score(point_labels, point_scores)
         except:
             auc = 0
         
-        print("原始预测结果评估指标:")
+        print("逐点预测结果评估指标:")
         print(f"Accuracy: {accuracy:.4f}")
         print(f"Precision: {precision:.4f}")
         print(f"Recall: {recall:.4f}")
         print(f"F1 Score: {f1:.4f}")
         print(f"AUC: {auc:.4f}")
         
-        # 6. 应用异常检测调整函数
+        # 6. 应用逐点异常检测调整函数
         print("\n应用异常检测调整函数...")
-        adjusted_pred = predictions.copy()
-        gt = test_labels
+        adjusted_pred = point_predictions.copy()
+        gt = point_labels
         
-        # 异常检测调整算法
+        # 改进的异常检测调整算法 - 限制连续异常的最大范围
+        max_adjustment_range = 20  # 限制向前/向后调整的最大范围
         anomaly_state = False
         for i in range(len(gt)):
             if gt[i] == 1 and adjusted_pred[i] == 1 and not anomaly_state:
                 anomaly_state = True
-                # 向前调整
-                for j in range(i, 0, -1):
+                # 向前调整，但限制最大范围
+                for j in range(i, max(0, i-max_adjustment_range), -1):
                     if gt[j] == 0:
                         break
                     else:
                         if adjusted_pred[j] == 0:
                             adjusted_pred[j] = 1
-                # 向后调整
-                for j in range(i, len(gt)):
+                # 向后调整，但限制最大范围
+                for j in range(i, min(len(gt), i+max_adjustment_range)):
                     if gt[j] == 0:
                         break
                     else:
@@ -322,9 +331,9 @@ class Exp_Anomaly(Exp_Basic):
             if anomaly_state:
                 adjusted_pred[i] = 1
         
-        # 7. 计算调整后的评估指标
-        adj_accuracy = accuracy_score(test_labels, adjusted_pred)
-        adj_precision, adj_recall, adj_f1, _ = precision_recall_fscore_support(test_labels, adjusted_pred, average='binary')
+        # 7. 计算调整后的逐点评估指标
+        adj_accuracy = accuracy_score(point_labels, adjusted_pred)
+        adj_precision, adj_recall, adj_f1, _ = precision_recall_fscore_support(point_labels, adjusted_pred, average='binary')
         
         print("\n调整后预测结果评估指标:")
         print(f"Adjusted Accuracy: {adj_accuracy:.4f}")
@@ -337,24 +346,32 @@ class Exp_Anomaly(Exp_Basic):
         result_path = os.path.join(folder_path, 'metrics.txt')
         with open(result_path, 'w') as f:
             f.write(f"Threshold: {threshold}\n")
-            f.write("\n原始预测结果评估指标:\n")
+            f.write("\n逐点预测结果评估指标:\n")
             f.write(f"Accuracy: {accuracy:.4f}\n")
             f.write(f"Precision: {precision:.4f}\n")
             f.write(f"Recall: {recall:.4f}\n")
             f.write(f"F1 Score: {f1:.4f}\n")
             f.write(f"AUC: {auc:.4f}\n")
             
-            f.write("\n调整后预测结果评估指标:\n")
+            f.write("\n调整后逐点预测结果评估指标:\n")
             f.write(f"Adjusted Accuracy: {adj_accuracy:.4f}\n")
             f.write(f"Adjusted Precision: {adj_precision:.4f}\n")
             f.write(f"Adjusted Recall: {adj_recall:.4f}\n")
             f.write(f"Adjusted F1 Score: {adj_f1:.4f}\n")
         
         # 保存异常分数和预测结果
-        np.save(os.path.join(folder_path, 'test_scores.npy'), test_scores)
-        np.save(os.path.join(folder_path, 'test_labels.npy'), test_labels)
-        np.save(os.path.join(folder_path, 'predictions.npy'), predictions)
+        np.save(os.path.join(folder_path, 'point_scores.npy'), point_scores)
+        np.save(os.path.join(folder_path, 'point_labels.npy'), point_labels)
+        np.save(os.path.join(folder_path, 'point_predictions.npy'), point_predictions)
         np.save(os.path.join(folder_path, 'adjusted_predictions.npy'), adjusted_pred)
+        
+        # 保存异常点的分布情况统计
+        anomaly_ratio = np.mean(point_labels)
+        print(f"\n数据集异常点比例: {anomaly_ratio:.4f} ({np.sum(point_labels)} / {len(point_labels)})")
+        with open(os.path.join(folder_path, 'anomaly_stats.txt'), 'w') as f:
+            f.write(f"总点数: {len(point_labels)}\n")
+            f.write(f"异常点数: {np.sum(point_labels)}\n")
+            f.write(f"异常比例: {anomaly_ratio:.4f}\n")
         
         # 返回原始指标和调整后的指标
         return accuracy, precision, recall, f1, adj_accuracy, adj_precision, adj_recall, adj_f1
