@@ -1,7 +1,7 @@
 from data_provider.data_factory import data_provider
 from data_provider.data_loader_anomaly import get_anomaly_loader
 from exp.exp_basic import Exp_Basic
-from models import PatchTST
+from models import PatchTST, Autoformer, Transformer, Informer, DLinear, Linear, NLinear
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 
 import numpy as np
@@ -24,8 +24,22 @@ class Exp_Anomaly(Exp_Basic):
         self.args.anormly_ratio = args.anormly_ratio  # 异常比例，用于计算阈值
         
     def _build_model(self):
-        # PatchTST作为异常检测的基础模型
-        model = PatchTST.Model(self.args).float()
+        # 根据用户指定的模型类型构建模型
+        model_dict = {
+            'PatchTST': PatchTST,
+            'Autoformer': Autoformer,
+            'Transformer': Transformer,
+            'Informer': Informer,
+            'DLinear': DLinear,
+            'NLinear': NLinear,
+            'Linear': Linear,
+        }
+        
+        if self.args.model not in model_dict:
+            raise ValueError(f"Model {self.args.model} not found. Available models: {list(model_dict.keys())}")
+            
+        print(f"构建 {self.args.model} 模型...")
+        model = model_dict[self.args.model].Model(self.args).float()
 
         if self.args.use_multi_gpu and self.args.use_gpu:
             model = nn.DataParallel(model, device_ids=self.args.device_ids)
@@ -53,16 +67,40 @@ class Exp_Anomaly(Exp_Basic):
 
     def _process_one_batch(self, batch_x):
         batch_x = batch_x.float().to(self.device)
-        # 使用PatchTST模型进行预测（实际上是重建）
-        outputs = self.model(batch_x)
+        
+        # 根据不同模型类型处理输入
+        if 'Linear' in self.args.model or 'TST' in self.args.model:
+            # 线性模型和PatchTST模型只需要batch_x
+            outputs = self.model(batch_x)
+        else:
+            # Transformer类模型需要更多输入
+            # 对于Autoformer和Transformer模型
+            # 创建decoder输入序列
+            batch_y = torch.zeros_like(batch_x).float().to(self.device)
+            dec_inp = torch.zeros((batch_x.shape[0], self.args.pred_len, batch_x.shape[2])).float().to(self.device)
+            if self.args.label_len > 0:
+                dec_inp = torch.cat([batch_y[:, -self.args.label_len:, :], dec_inp], dim=1).to(self.device)
+            
+            # 创建时间特征标记（简化处理，全零）
+            time_features_dim = 4  # 时间特征维度
+            batch_x_mark = torch.zeros((batch_x.shape[0], batch_x.shape[1], time_features_dim)).float().to(self.device)
+            # 为decoder输入创建时间特征标记
+            dec_len = self.args.pred_len
+            if self.args.label_len > 0:
+                dec_len += self.args.label_len
+            batch_y_mark = torch.zeros((batch_x.shape[0], dec_len, time_features_dim)).float().to(self.device)
+            
+            if self.args.output_attention:
+                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+            else:
+                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
         
         # 只打印一次调试信息
         if hasattr(self, '_printed_debug') == False:
             print(f"输入形状: {batch_x.shape}, 输出形状: {outputs.shape}")
             self._printed_debug = True
         
-        # PatchTST模型预测未来值，但我们用于重建，将输出与输入对齐比较
-        # 由于我们设置了pred_len=seq_len，输出应该与输入长度相同
+        # 检查输出与输入的尺寸是否匹配
         if outputs.shape[1] != batch_x.shape[1]:
             print(f"警告：输出时间步长 {outputs.shape[1]} 与输入时间步长 {batch_x.shape[1]} 不匹配")
         

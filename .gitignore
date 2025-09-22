@@ -11,7 +11,7 @@
 auto-save-list
 tramp
 .\#*
-
+PatchTST_supervised/
 # Org-mode
 .org-id-locations
 *_archive

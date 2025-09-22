@@ -17,6 +17,7 @@ parser.add_argument('--root_path', type=str, default='./dataset/ALLcontact_noSeg
 parser.add_argument('--data_path', type=str, default='./dataset/ALLcontact_noSegment/', help='data file')
 parser.add_argument('--features', type=str, default='M', help='forecasting task, options:[M, S, MS]; M:multivariate, S:univariate')
 parser.add_argument('--target', type=str, default='OT', help='target feature in S or MS task')
+parser.add_argument('--freq', type=str, default='h', help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly]')
 parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
 
 # 异常检测参数
@@ -29,9 +30,12 @@ parser.add_argument('--seq_len', type=int, default=100, help='input sequence len
 parser.add_argument('--label_len', type=int, default=0, help='start token length')
 parser.add_argument('--pred_len', type=int, default=100, help='prediction sequence length, for reconstruction')
 parser.add_argument('--enc_in', type=int, default=27, help='encoder input size') # 数据集有27个特征
+parser.add_argument('--dec_in', type=int, default=27, help='decoder input size')
+parser.add_argument('--c_out', type=int, default=27, help='output size')
 parser.add_argument('--d_model', type=int, default=256, help='dimension of model')
 parser.add_argument('--n_heads', type=int, default=8, help='num of heads')
 parser.add_argument('--e_layers', type=int, default=3, help='num of encoder layers')
+parser.add_argument('--d_layers', type=int, default=1, help='num of decoder layers')
 parser.add_argument('--d_ff', type=int, default=512, help='dimension of fcn')
 parser.add_argument('--patch_len', type=int, default=16, help='patch length')
 parser.add_argument('--stride', type=int, default=8, help='stride')
@@ -40,12 +44,16 @@ parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
 parser.add_argument('--fc_dropout', type=float, default=0.1, help='fully connected dropout')
 parser.add_argument('--head_dropout', type=float, default=0.0, help='head dropout')
 parser.add_argument('--embed', type=str, default='timeF', help='time features encoding, options:[timeF, fixed, learned]')
+parser.add_argument('--embed_type', type=int, default=0, help='0: default 1: value embedding + temporal embedding + positional embedding 2: value embedding + temporal embedding 3: value embedding + positional embedding 4: value embedding')
 parser.add_argument('--activation', type=str, default='gelu', help='activation')
 parser.add_argument('--output_attention', action='store_true', help='whether to output attention in encoder')
 parser.add_argument('--do_predict', action='store_true', help='whether to predict unseen future data')
 parser.add_argument('--individual', action='store_true', default=False, help='individual parameters for each variate')
 parser.add_argument('--decomposition', action='store_true', help='decomposition')
+parser.add_argument('--distil', action='store_false', help='whether to use distilling in encoder, using this argument means not using distilling', default=True)
+parser.add_argument('--factor', type=int, default=3, help='attn factor for Autoformer')
 parser.add_argument('--kernel_size', type=int, default=25, help='for decomposition')
+parser.add_argument('--moving_avg', type=int, default=25, help='window size of moving average for Autoformer')
 
 # 优化器参数
 parser.add_argument('--batch_size', type=int, default=128, help='batch size')
