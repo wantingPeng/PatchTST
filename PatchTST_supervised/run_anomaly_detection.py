@@ -1,34 +1,33 @@
 import argparse
 import os
 import torch
-from exp.exp_anomaly import Exp_Anomaly
+from exp.exp_anomaly import Exp_Anomaly_Detection
 
 parser = argparse.ArgumentParser(description='PatchTST for Anomaly Detection')
 
 # 基本配置
-parser.add_argument('--model', type=str, default='PatchTST', help='model name')
+parser.add_argument('--model', type=str, default='Linear', help='model name')
 parser.add_argument('--is_training', type=int, default=1, help='status')
 parser.add_argument('--train_only', type=bool, default=False, help='perform training only')
 parser.add_argument('--test_only', type=bool, default=False, help='perform testing only')
 
 # 数据加载器参数
 parser.add_argument('--data', type=str, default='custom', help='dataset type')
-parser.add_argument('--root_path', type=str, default='./dataset/ALLcontact_noSegment/', help='root path of the data file')
-parser.add_argument('--data_path', type=str, default='./dataset/ALLcontact_noSegment/', help='data file')
+parser.add_argument('--data_path', type=str, default='./dataset/dataset/downsampleData_scratch_1minut/contact/contact_cleaned_1minut_20250928_172122.parquet', help='data file')
 parser.add_argument('--features', type=str, default='M', help='forecasting task, options:[M, S, MS]; M:multivariate, S:univariate')
 parser.add_argument('--target', type=str, default='OT', help='target feature in S or MS task')
 parser.add_argument('--freq', type=str, default='h', help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly]')
 parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
 
 # 异常检测参数
-parser.add_argument('--win_size', type=int, default=500, help='window size for anomaly detection')
+parser.add_argument('--win_size', type=int, default=100, help='window size for anomaly detection')
 parser.add_argument('--step', type=int, default=1, help='step size for sliding window')
-parser.add_argument('--anormly_ratio', type=float, default=5.0, help='anomaly ratio used for threshold')
+parser.add_argument('--anormly_ratio', type=float, default=3.0, help='anomaly ratio used for threshold')
 
 # 模型参数
-parser.add_argument('--seq_len', type=int, default=500, help='input sequence length')
+parser.add_argument('--seq_len', type=int, default=100, help='input sequence length')
 parser.add_argument('--label_len', type=int, default=0, help='start token length')
-parser.add_argument('--pred_len', type=int, default=500, help='prediction sequence length, for reconstruction')
+parser.add_argument('--pred_len', type=int, default=100, help='prediction sequence length, for reconstruction')
 parser.add_argument('--enc_in', type=int, default=27, help='encoder input size') # 数据集有27个特征
 parser.add_argument('--dec_in', type=int, default=27, help='decoder input size')
 parser.add_argument('--c_out', type=int, default=27, help='output size')
@@ -93,13 +92,12 @@ if args.use_gpu and args.use_multi_gpu:
 
 # 配置实验名称和设置
 data_parser = {
-    'custom': {'data': 'custom', 'root_path': args.root_path, 'data_path': args.data_path}
+    'custom': {'data': 'custom',  'data_path': args.data_path}
 }
 
 if args.data in data_parser.keys():
     data_info = data_parser[args.data]
     args.data_path = data_info['data_path']
-    args.root_path = data_info['root_path']
 
 args.setting = '{}_{}_{}'.format(args.model, args.data, args.des)
 
@@ -107,7 +105,7 @@ print('Args in experiment:')
 print(args)
 
 # 运行实验
-Exp = Exp_Anomaly
+Exp = Exp_Anomaly_Detection
 
 if args.is_training:
     exp = Exp(args)  # 创建实验
