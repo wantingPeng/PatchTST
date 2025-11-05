@@ -1,7 +1,7 @@
 from models import PatchTST, Autoformer, Transformer, Informer, DLinear, NLinear, Linear
 from exp.exp_basic import Exp_Basic
 from data_provider.data_loader_anomaly import get_anomaly_loader
-from utils.tools import EarlyStopping, adjust_learning_rate, adjustment
+from utils.tools import adjust_learning_rate, adjustment
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import accuracy_score
 import torch.multiprocessing
@@ -14,13 +14,80 @@ import os
 import time
 import warnings
 import numpy as np
+from datetime import datetime
+import json
 
 warnings.filterwarnings('ignore')
+
+
+# 自定义EarlyStopping类，与DCdetector的保存逻辑一致
+class EarlyStopping:
+    def __init__(self, patience=7, verbose=False, dataset_name='', delta=0, metadata=None):
+        self.patience = patience
+        self.verbose = verbose
+        self.counter = 0
+        self.best_score = None
+        self.early_stop = False
+        self.val_loss_min = np.inf
+        self.delta = delta
+        self.dataset = dataset_name
+        self.metadata = metadata if isinstance(metadata, dict) else None
+
+    def __call__(self, val_loss, model, path):
+        score = -val_loss
+        if self.best_score is None:
+            self.best_score = score
+            checkpoint_path = self.save_checkpoint(val_loss, model, path)
+            return checkpoint_path
+        elif score < self.best_score + self.delta:
+            self.counter += 1
+            if self.verbose:
+                print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.counter >= self.patience:
+                self.early_stop = True
+            return None
+        else:
+            self.best_score = score
+            checkpoint_path = self.save_checkpoint(val_loss, model, path)
+            self.counter = 0
+            return checkpoint_path
+
+    def save_checkpoint(self, val_loss, model, path):
+        if self.verbose:
+            print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
+        
+        # 直接使用path，不创建额外的子目录
+        os.makedirs(path, exist_ok=True)
+        
+        # 保存模型到model.pth
+        model_path = os.path.join(path, "model.pth")
+        torch.save(model.state_dict(), model_path)
+        
+        # 保存运行参数配置到config.json
+        if self.metadata is not None:
+            try:
+                cfg_path = os.path.join(path, "config.json")
+                with open(cfg_path, 'w', encoding='utf-8') as f:
+                    json.dump(self.metadata, f, ensure_ascii=False, indent=2)
+            except Exception:
+                pass
+        
+        self.val_loss_min = val_loss
+        
+        # 返回保存的checkpoint目录路径
+        return path
 
 
 class Exp_Anomaly_Detection(Exp_Basic):
     def __init__(self, args):
         super(Exp_Anomaly_Detection, self).__init__(args)
+        # 保存运行配置为字典，用于保存到config.json
+        try:
+            self.run_config = vars(args)
+        except Exception:
+            self.run_config = None
+        # 存储最新保存的checkpoint目录路径
+        self.latest_checkpoint_dir = None
 
     def _build_model(self):
         model_dict = {
@@ -60,7 +127,15 @@ class Exp_Anomaly_Detection(Exp_Basic):
                 if ('Linear' in self.args.model) or ('TST' in self.args.model):
                     outputs = self.model(batch_x)
                 else:
-                    outputs = self.model(batch_x, None, None, None)
+                    # Create decoder input and dummy time marks for encoder-decoder models
+                    dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
+                                         dtype=torch.float, device=self.device)
+                    # Create dummy time marks (zeros) for models that need temporal embeddings
+                    batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
+                                               dtype=torch.float, device=self.device)
+                    batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
+                                               dtype=torch.float, device=self.device)
+                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
                 f_dim = -1 if self.args.features == 'MS' else 0
                 outputs = outputs[:, :, f_dim:]
@@ -85,7 +160,9 @@ class Exp_Anomaly_Detection(Exp_Basic):
         time_now = time.time()
 
         train_steps = len(train_loader)
-        early_stopping = EarlyStopping(patience=self.args.patience, verbose=True)
+        # 使用新的EarlyStopping，传入dataset名称和配置元数据
+        early_stopping = EarlyStopping(patience=self.args.patience, verbose=True, 
+                                      dataset_name=setting, metadata=self.run_config)
 
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
@@ -105,7 +182,15 @@ class Exp_Anomaly_Detection(Exp_Basic):
                 if ('Linear' in self.args.model) or ('TST' in self.args.model):
                     outputs = self.model(batch_x)
                 else:
-                    outputs = self.model(batch_x, None, None, None)
+                    # Create decoder input and dummy time marks for encoder-decoder models
+                    dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
+                                         dtype=torch.float, device=self.device)
+                    # Create dummy time marks (zeros) for models that need temporal embeddings
+                    batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
+                                               dtype=torch.float, device=self.device)
+                    batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
+                                               dtype=torch.float, device=self.device)
+                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
                 f_dim = -1 if self.args.features == 'MS' else 0
                 outputs = outputs[:, :, f_dim:]
@@ -126,36 +211,54 @@ class Exp_Anomaly_Detection(Exp_Basic):
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
             vali_loss = self.vali(vali_data, vali_loader, criterion)
-            test_loss = self.vali(test_data, test_loader, criterion)
+          
 
-            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
-                epoch + 1, train_steps, train_loss, vali_loss, test_loss))
-            early_stopping(vali_loss, self.model, path)
+            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f}".format(
+                epoch + 1, train_steps, train_loss, vali_loss))
+            # 调用early_stopping并保存返回的checkpoint目录
+            checkpoint_dir = early_stopping(vali_loss, self.model, path)
+            if checkpoint_dir is not None:
+                self.latest_checkpoint_dir = checkpoint_dir
+                print(f"Saved checkpoint to: {checkpoint_dir}")
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
             adjust_learning_rate(model_optim, None, epoch + 1, self.args)
 
-        best_model_path = path + '/' + 'checkpoint.pth'
-        self.model.load_state_dict(torch.load(best_model_path))
+        # 加载最佳模型
+        # if self.latest_checkpoint_dir is not None and os.path.isdir(self.latest_checkpoint_dir):
+        #     best_model_path = os.path.join(self.latest_checkpoint_dir, "model.pth")
+        #     self.model.load_state_dict(torch.load(best_model_path))
+        #     print(f"Loaded best model from: {best_model_path}")  #在测试前把“磁盘上的最佳权重”加载回内存，确保评估用的就是最佳模型
 
         return self.model
 
-    def test(self, setting, test=0):
+    def test(self, setting, test=0, checkpoint_path=None):
         test_data, test_loader = self._get_data(flag='test')
         train_data, train_loader = self._get_data(flag='train')
-        if test:
-            print('loading model')
-            self.model.load_state_dict(torch.load(os.path.join('./checkpoints/' + setting, 'checkpoint.pth')))
-
-        attens_energy = []
-        folder_path = './test_results/' + setting + '/'
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
+        
+        # 确定checkpoint目录
+        if checkpoint_path is not None and os.path.isdir(checkpoint_path):
+            # 使用传入的checkpoint路径
+            ckpt_dir = checkpoint_path
+            print(f"Using checkpoint directory: {ckpt_dir}")
+        elif self.latest_checkpoint_dir is not None and os.path.isdir(self.latest_checkpoint_dir):
+            # 使用训练时保存的最新checkpoint目录
+            ckpt_dir = self.latest_checkpoint_dir
+            print(f"Using latest checkpoint directory: {ckpt_dir}")
+        else:
+            # 否则直接中断程序，抛出错误
+            raise RuntimeError("未找到checkpoint目录，程序中断。")
+        # 如果有checkpoint目录，从中加载model.pth
+        if ckpt_dir is not None:
+            model_path = os.path.join(ckpt_dir, "model.pth")
+            if not os.path.exists(model_path):
+                raise FileNotFoundError(f"Model file not found: {model_path}")
+            self.model.load_state_dict(torch.load(model_path))
 
         self.model.eval()
         self.anomaly_criterion = nn.MSELoss(reduce=False)
-
+        attens_energy = []
         # (1) stastic on the train set
         with torch.no_grad():
             for i, (batch_x, batch_y) in enumerate(train_loader):
@@ -164,7 +267,15 @@ class Exp_Anomaly_Detection(Exp_Basic):
                 if ('Linear' in self.args.model) or ('TST' in self.args.model):
                     outputs = self.model(batch_x)
                 else:
-                    outputs = self.model(batch_x, None, None, None)
+                    # Create decoder input and dummy time marks for encoder-decoder models
+                    dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
+                                         dtype=torch.float, device=self.device)
+                    # Create dummy time marks (zeros) for models that need temporal embeddings
+                    batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
+                                               dtype=torch.float, device=self.device)
+                    batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
+                                               dtype=torch.float, device=self.device)
+                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                 # criterion
                 score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
                 score = score.detach().cpu().numpy()
@@ -182,7 +293,15 @@ class Exp_Anomaly_Detection(Exp_Basic):
             if ('Linear' in self.args.model) or ('TST' in self.args.model):
                 outputs = self.model(batch_x)
             else:
-                outputs = self.model(batch_x, None, None, None)
+                # Create decoder input and dummy time marks for encoder-decoder models
+                dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
+                                     dtype=torch.float, device=self.device)
+                # Create dummy time marks (zeros) for models that need temporal embeddings
+                batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
+                                           dtype=torch.float, device=self.device)
+                batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
+                                           dtype=torch.float, device=self.device)
+                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
             score = score.detach().cpu().numpy()
@@ -201,16 +320,12 @@ class Exp_Anomaly_Detection(Exp_Basic):
         test_labels = np.array(test_labels)
         gt = test_labels.astype(int)
 
-        print("pred:   ", pred.shape)
-        print("gt:     ", gt.shape)
 
         # (4) detection adjustment
         gt, pred = adjustment(gt, pred)
 
         pred = np.array(pred)
         gt = np.array(gt)
-        print("pred: ", pred.shape)
-        print("gt:   ", gt.shape)
 
         accuracy = accuracy_score(gt, pred)
         precision, recall, f_score, support = precision_recall_fscore_support(gt, pred, average='binary')
@@ -226,4 +341,24 @@ class Exp_Anomaly_Detection(Exp_Basic):
         f.write('\n')
         f.write('\n')
         f.close()
+        
+        # 保存测试结果到result.json（如果使用了checkpoint目录结构）
+        if ckpt_dir is not None:
+            try:
+                result_payload = {
+                    "threshold": float(threshold),
+                    "summary": {
+                        "accuracy": float(accuracy),
+                        "precision": float(precision),
+                        "recall": float(recall),
+                        "f_score": float(f_score)
+                    }
+                }
+                result_path = os.path.join(ckpt_dir, "result.json")
+                with open(result_path, 'w', encoding='utf-8') as f:
+                    json.dump(result_payload, f, ensure_ascii=False, indent=2)
+                print(f"Test results saved to: {result_path}")
+            except Exception as e:
+                print(f"Failed to save test results: {e}")
+        
         return

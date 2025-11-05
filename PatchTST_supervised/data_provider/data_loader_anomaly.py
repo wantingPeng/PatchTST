@@ -18,10 +18,10 @@ class CustomLoader(object):
     
     注意：验证集和测试集始终保持原始分布，不受这两个参数影响。
     """
-    def __init__(self, data_path, win_size, step, mode="train"):
+    def __init__(self, data_path, seq_len, step, mode="train"):
         self.mode = mode
         self.step = step
-        self.win_size = win_size
+        self.seq_len = seq_len
         self.scaler = StandardScaler()
 
         # 直接使用传入的 Parquet 完整路径
@@ -144,38 +144,38 @@ class CustomLoader(object):
         返回数据集中样本的数量
         """
         if self.mode == "train":
-            return (self.train.shape[0] - self.win_size) // self.step + 1
+            return (self.train.shape[0] - self.seq_len) // self.step + 1
         elif self.mode == 'val':
-            return (self.val.shape[0] - self.win_size) // self.step + 1
+            return (self.val.shape[0] - self.seq_len) // self.step + 1
         elif self.mode == 'test':
-            return (self.test.shape[0] - self.win_size) // self.win_size + 1
+            return (self.test.shape[0] - self.seq_len) // self.seq_len + 1
 
     def __getitem__(self, index):
         if self.mode == "train":
             # 训练模式：返回训练数据窗口和虚拟标签(训练时不使用真实标签)
             index = index * self.step
-            return np.float32(self.train[index:index + self.win_size]), \
-                   np.float32(np.zeros(self.win_size))  # 训练时标签设为0
+            return np.float32(self.train[index:index + self.seq_len]), \
+                   np.float32(np.zeros(self.seq_len))  # 训练时标签设为0
         elif self.mode == 'val':
             # 验证模式：返回验证数据窗口和对应标签
             index = index * self.step
-            return np.float32(self.val[index:index + self.win_size]), \
-                   np.float32(self.val_labels[index:index + self.win_size])
+            return np.float32(self.val[index:index + self.seq_len]), \
+                   np.float32(self.val_labels[index:index + self.seq_len])
         elif self.mode == 'test':
             # 测试模式：返回测试数据窗口和对应标签（无重叠窗口）
-            index = index * self.win_size
-            return np.float32(self.test[index:index + self.win_size]), \
-                   np.float32(self.test_labels[index:index + self.win_size])
+            index = index * self.seq_len
+            return np.float32(self.test[index:index + self.seq_len]), \
+                   np.float32(self.test_labels[index:index + self.seq_len])
  
 
 
-def get_anomaly_loader(data_path, batch_size, win_size, step=1, mode='train', num_workers=0):
+def get_anomaly_loader(data_path, batch_size, seq_len, step=1, mode='train', num_workers=0):
     """
     创建数据加载器
     """
     dataset = CustomLoader(
         data_path=data_path, 
-        win_size=win_size,
+        seq_len=seq_len,
         step=step,
         mode=mode
     )
