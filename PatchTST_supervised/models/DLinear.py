@@ -14,8 +14,11 @@ class moving_avg(nn.Module):
 
     def forward(self, x):
         # padding on the both ends of time series
-        front = x[:, 0:1, :].repeat(1, (self.kernel_size - 1) // 2, 1)
-        end = x[:, -1:, :].repeat(1, (self.kernel_size - 1) // 2, 1)
+        # For even kernel sizes, we need asymmetric padding
+        left_pad = (self.kernel_size - 1) // 2
+        right_pad = self.kernel_size // 2
+        front = x[:, 0:1, :].repeat(1, left_pad, 1)
+        end = x[:, -1:, :].repeat(1, right_pad, 1)
         x = torch.cat([front, x, end], dim=1)
         x = self.avg(x.permute(0, 2, 1))
         x = x.permute(0, 2, 1)
@@ -45,8 +48,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
 
         # Decompsition Kernel Size
-        kernel_size = 25
-        self.decompsition = series_decomp(kernel_size)
+        self.decompsition = series_decomp(configs.kernel_size)
         self.individual = configs.individual
         self.channels = configs.enc_in
 
