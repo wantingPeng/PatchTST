@@ -20,24 +20,29 @@ import json
 warnings.filterwarnings('ignore')
 
 
-# 自定义EarlyStopping类，与DCdetector的保存逻辑一致
 class EarlyStopping:
-    def __init__(self, patience=7, verbose=False, dataset_name='', delta=0, metadata=None):
+    def __init__(self, patience=7, verbose=False, dataset_name='', delta=0, metadata=None, mode='min'):
         self.patience = patience
         self.verbose = verbose
         self.counter = 0
         self.best_score = None
         self.early_stop = False
-        self.val_loss_min = np.inf
+        self.val_metric_best = np.inf if mode == 'min' else -np.inf
         self.delta = delta
         self.dataset = dataset_name
         self.metadata = metadata if isinstance(metadata, dict) else None
+        self.mode = mode  # 'min' for loss, 'max' for F1/accuracy
 
-    def __call__(self, val_loss, model, path):
-        score = -val_loss
+    def __call__(self, val_metric, model, path):
+        # 根据mode决定score的方向
+        if self.mode == 'min':
+            score = -val_metric  # loss越小越好
+        else:
+            score = val_metric   # F1越大越好
+            
         if self.best_score is None:
             self.best_score = score
-            checkpoint_path = self.save_checkpoint(val_loss, model, path)
+            checkpoint_path = self.save_checkpoint(val_metric, model, path)
             return checkpoint_path
         elif score < self.best_score + self.delta:
             self.counter += 1
@@ -48,13 +53,16 @@ class EarlyStopping:
             return None
         else:
             self.best_score = score
-            checkpoint_path = self.save_checkpoint(val_loss, model, path)
+            checkpoint_path = self.save_checkpoint(val_metric, model, path)
             self.counter = 0
             return checkpoint_path
 
-    def save_checkpoint(self, val_loss, model, path):
+    def save_checkpoint(self, val_metric, model, path):
         if self.verbose:
-            print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
+            if self.mode == 'min':
+                print(f'Validation loss decreased ({self.val_metric_best:.6f} --> {val_metric:.6f}).  Saving model ...')
+            else:
+                print(f'Validation F1 increased ({self.val_metric_best:.4f} --> {val_metric:.4f}).  Saving model ...')
         
         # 直接使用path，不创建额外的子目录
         os.makedirs(path, exist_ok=True)
@@ -72,7 +80,7 @@ class EarlyStopping:
             except Exception:
                 pass
         
-        self.val_loss_min = val_loss
+        self.val_metric_best = val_metric
         
         # 返回保存的checkpoint目录路径
         return path
@@ -147,6 +155,68 @@ class Exp_Anomaly_Detection(Exp_Basic):
         total_loss = np.average(total_loss)
         self.model.train()
         return total_loss
+    
+    def evaluate_anomaly_detection(self, train_loader, vali_loader):
+        """在验证集上评估异常检测性能（用于early stopping）"""
+        self.model.eval()
+        self.anomaly_criterion = nn.MSELoss(reduce=False)
+        
+        # (1) 计算训练集的重建误差（用于确定阈值）
+        train_energy = []
+        with torch.no_grad():
+            for i, (batch_x, batch_y) in enumerate(train_loader):
+                batch_x = batch_x.float().to(self.device)
+                if ('Linear' in self.args.model) or ('TST' in self.args.model):
+                    outputs = self.model(batch_x)
+                else:
+                    dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
+                                         dtype=torch.float, device=self.device)
+                    batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
+                                               dtype=torch.float, device=self.device)
+                    batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
+                                               dtype=torch.float, device=self.device)
+                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                
+                score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
+                train_energy.append(score.detach().cpu().numpy())
+        
+        train_energy = np.concatenate(train_energy, axis=0).reshape(-1)
+        
+        # (2) 计算验证集的重建误差和标签
+        vali_energy = []
+        vali_labels = []
+        with torch.no_grad():
+            for i, (batch_x, batch_y) in enumerate(vali_loader):
+                batch_x = batch_x.float().to(self.device)
+                if ('Linear' in self.args.model) or ('TST' in self.args.model):
+                    outputs = self.model(batch_x)
+                else:
+                    dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
+                                         dtype=torch.float, device=self.device)
+                    batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
+                                               dtype=torch.float, device=self.device)
+                    batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
+                                               dtype=torch.float, device=self.device)
+                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                
+                score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
+                vali_energy.append(score.detach().cpu().numpy())
+                vali_labels.append(batch_y)
+        
+        vali_energy = np.concatenate(vali_energy, axis=0).reshape(-1)
+        vali_labels = np.concatenate(vali_labels, axis=0).reshape(-1).astype(int)
+        
+        threshold = np.percentile(train_energy, 100 - self.args.anormly_ratio)
+        
+        pred = (vali_energy > threshold).astype(int)
+        
+        gt, pred = adjustment(vali_labels, pred)
+        
+        precision, recall, f_score, _ = precision_recall_fscore_support(gt, pred, average='binary', zero_division=0)
+        accuracy = accuracy_score(gt, pred)
+        
+        self.model.train()
+        return f_score, accuracy, precision, recall, threshold
 
     def train(self, setting):
         train_data, train_loader = self._get_data(flag='train')
@@ -160,9 +230,9 @@ class Exp_Anomaly_Detection(Exp_Basic):
         time_now = time.time()
 
         train_steps = len(train_loader)
-        # 使用新的EarlyStopping，传入dataset名称和配置元数据
+        # 使用新的EarlyStopping，mode='max'表示F1越大越好
         early_stopping = EarlyStopping(patience=self.args.patience, verbose=True, 
-                                      dataset_name=setting, metadata=self.run_config)
+                                      dataset_name=setting, metadata=self.run_config, mode='max')
 
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
@@ -211,12 +281,17 @@ class Exp_Anomaly_Detection(Exp_Basic):
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
             vali_loss = self.vali(vali_data, vali_loader, criterion)
-          
+            
+            # 在验证集上评估异常检测性能
+            vali_f1, vali_acc, vali_precision, vali_recall, vali_threshold = self.evaluate_anomaly_detection(train_loader, vali_loader)
 
             print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f}".format(
                 epoch + 1, train_steps, train_loss, vali_loss))
-            # 调用early_stopping并保存返回的checkpoint目录
-            checkpoint_dir = early_stopping(vali_loss, self.model, path)
+            print("Vali Anomaly Detection | F1: {0:.4f} Precision: {1:.4f} Recall: {2:.4f} Threshold: {3:.6f}".format(
+                vali_f1, vali_precision, vali_recall, vali_threshold))
+            
+            # 使用F1 score进行early stopping（而不是loss）
+            checkpoint_dir = early_stopping(vali_f1, self.model, path)
             if checkpoint_dir is not None:
                 self.latest_checkpoint_dir = checkpoint_dir
                 print(f"Saved checkpoint to: {checkpoint_dir}")
