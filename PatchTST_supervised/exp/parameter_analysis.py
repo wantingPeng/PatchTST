@@ -34,9 +34,9 @@ PARAM_VALUES = {
     'n_heads': [1, 2, 4, 8],  # Changed from [1,3,5,7] to ensure divisibility with d_model
     'e_layers': [1,3,5,7],
     'anormly_ratio': [1.0, 2.0, 3.0, 4.0, 5.0, 6.0,7.0,8.0,9.0,10.0],
-    'patch_len': [10,16,22,28,34,40,46,52,58,64,70],
+    'patch_len': [10,16,22,28,34],
     # seq_len and pred_len should change together for anomaly detection (reconstruction task)
-    'seq_len': [50,100,150,200,250,300,350,400,450,500],  # When analyzing seq_len, pred_len will be set to the same value
+    'seq_len': [50,100,150,200,250,300],  # When analyzing seq_len, pred_len will be set to the same value
     'kernel_size': [5,15,25,35,45,55,65,75,85],
 }
 
@@ -71,22 +71,22 @@ PLOT_STYLE = 'seaborn-v0_8-darkgrid'
 
 DATASET_CONFIGS = {
      'contact': {
-         'data_path': 'dataset/dataset/pca_analysis_and_result_1/contact/pca_features_contact.parquet',
-         'enc_in': 7,
-         'dec_in': 7,
-         'c_out': 7,
-     },
-    'ring': {
-        'data_path': 'dataset/dataset/pca_analysis_and_result_1/ring/pca_features_ring.parquet',
-        'enc_in': 6,
-        'dec_in': 6,
-        'c_out': 6,
-     },
-     'pcb': {
-         'data_path': 'dataset/dataset/pca_analysis_and_result_1/pcb/pca_features_pcb.parquet',
+         'data_path': 'dataset/dataset/downsampleData_scratch_1minut/contact/contact_cleaned_1minut_20250928_172122.parquet',
          'enc_in': 10,
          'dec_in': 10,
          'c_out': 10,
+     },
+    'ring': {
+        'data_path': 'dataset/dataset/downsampleData_scratch_1minut/ring/Ring_cleaned_1minut_20250928_170147.parquet',
+        'enc_in': 10,
+        'dec_in': 10,
+        'c_out': 10,
+     },
+     'pcb': {
+         'data_path': 'dataset/dataset/downsampleData_scratch_1minut/pcb/pcb_cleaned_1minut_20250928_161509.parquet',
+        'enc_in': 10,
+        'dec_in': 10,
+        'c_out': 10,
      }
 }
 
@@ -153,7 +153,7 @@ def run_single_experiment(dataset_name, param_name, param_value, fixed_params):
     # Then setting = PatchTST_custom_experiment_id
     # And path = checkpoints_n_heads_analysis/PatchTST_custom_experiment_id/
     
-    checkpoints_parent = f'checkpoints_{param_name}_analysis_pca'
+    checkpoints_parent = f'checkpoints2_{param_name}_analysis_pca'
     setting = f"{params['model']}_{params['data']}_{experiment_id}"
     model_save_path = os.path.join(checkpoints_parent, setting)
     
