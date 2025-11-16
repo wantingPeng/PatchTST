@@ -2782,3 +2782,612 @@ Accuracy : 0.9715, Precision : 0.3495, Recall : 0.4188, F-score : 0.3811
 PatchTST_custom_pcb_seq_len300_20251113_163706  
 Accuracy : 0.9593, Precision : 0.2408, Recall : 0.4336, F-score : 0.3096 
 
+PatchTST_custom_contact_n_heads1_20251114_080849  
+Accuracy : 0.9441, Precision : 0.4560, Recall : 0.5451, F-score : 0.4966 
+
+PatchTST_custom_contact_n_heads1_20251114_080905  
+Accuracy : 0.9406, Precision : 0.4288, Recall : 0.5212, F-score : 0.4705 
+
+PatchTST_custom_contact_n_heads2_20251114_081026  
+Accuracy : 0.9412, Precision : 0.4310, Recall : 0.5048, F-score : 0.4650 
+
+PatchTST_custom_contact_n_heads2_20251114_081053  
+Accuracy : 0.9468, Precision : 0.4786, Recall : 0.5654, F-score : 0.5184 
+
+PatchTST_custom_contact_n_heads4_20251114_081218  
+Accuracy : 0.9467, Precision : 0.4774, Recall : 0.5666, F-score : 0.5182 
+
+PatchTST_custom_contact_n_heads4_20251114_081246  
+Accuracy : 0.9446, Precision : 0.4619, Recall : 0.5791, F-score : 0.5139 
+
+PatchTST_custom_contact_n_heads8_20251114_081415  
+Accuracy : 0.9392, Precision : 0.4217, Recall : 0.5407, F-score : 0.4739 
+
+PatchTST_custom_contact_n_heads8_20251114_081445  
+Accuracy : 0.9425, Precision : 0.4441, Recall : 0.5415, F-score : 0.4880 
+
+PatchTST_custom_ring_n_heads1_20251114_081623  
+Accuracy : 0.9517, Precision : 0.4529, Recall : 0.7175, F-score : 0.5553 
+
+PatchTST_custom_ring_n_heads1_20251114_081648  
+Accuracy : 0.9083, Precision : 0.2921, Recall : 0.8298, F-score : 0.4321 
+
+PatchTST_custom_ring_n_heads2_20251114_081829  
+Accuracy : 0.9396, Precision : 0.3775, Recall : 0.6732, F-score : 0.4837 
+
+PatchTST_custom_ring_n_heads2_20251114_081855  
+Accuracy : 0.9365, Precision : 0.3642, Recall : 0.6830, F-score : 0.4751 
+
+PatchTST_custom_ring_n_heads4_20251114_082042  
+Accuracy : 0.9398, Precision : 0.3772, Recall : 0.6634, F-score : 0.4810 
+
+PatchTST_custom_ring_n_heads4_20251114_082109  
+Accuracy : 0.9377, Precision : 0.3684, Recall : 0.6751, F-score : 0.4767 
+
+PatchTST_custom_ring_n_heads8_20251114_082300  
+Accuracy : 0.9353, Precision : 0.3509, Recall : 0.6330, F-score : 0.4515 
+
+PatchTST_custom_ring_n_heads8_20251114_082329  
+Accuracy : 0.9483, Precision : 0.4060, Recall : 0.4965, F-score : 0.4467 
+
+PatchTST_custom_pcb_n_heads1_20251114_082529  
+Accuracy : 0.9667, Precision : 0.3218, Recall : 0.5316, F-score : 0.4009 
+
+PatchTST_custom_pcb_n_heads1_20251114_082555  
+Accuracy : 0.9679, Precision : 0.3172, Recall : 0.4608, F-score : 0.3757 
+
+PatchTST_custom_pcb_n_heads2_20251114_082754  
+Accuracy : 0.9668, Precision : 0.3362, Recall : 0.5953, F-score : 0.4297 
+
+PatchTST_custom_pcb_n_heads2_20251114_082821  
+Accuracy : 0.9660, Precision : 0.3063, Recall : 0.4902, F-score : 0.3770 
+
+PatchTST_custom_contact_n_heads1_20251114_084355  
+Accuracy : 0.9378, Precision : 0.3984, Recall : 0.4519, F-score : 0.4235 
+
+PatchTST_custom_contact_n_heads2_20251114_084456  
+Accuracy : 0.9411, Precision : 0.4369, Recall : 0.5713, F-score : 0.4951 
+
+PatchTST_custom_contact_seq_len50_20251114_084500  
+Accuracy : 0.9491, Precision : 0.4973, Recall : 0.5948, F-score : 0.5417 
+
+PatchTST_custom_contact_n_heads4_20251114_084705  
+Accuracy : 0.9434, Precision : 0.4531, Recall : 0.5735, F-score : 0.5063 
+
+PatchTST_custom_contact_n_heads8_20251114_084923  
+Accuracy : 0.9435, Precision : 0.4539, Recall : 0.5725, F-score : 0.5063 
+
+PatchTST_custom_contact_seq_len100_20251114_084744  
+Accuracy : 0.9460, Precision : 0.4687, Recall : 0.5072, F-score : 0.4872 
+
+PatchTST_custom_ring_n_heads1_20251114_085152  
+Accuracy : 0.9340, Precision : 0.3537, Recall : 0.6876, F-score : 0.4671 
+
+PatchTST_custom_ring_n_heads2_20251114_085430  
+Accuracy : 0.9212, Precision : 0.3145, Recall : 0.7403, F-score : 0.4414 
+
+PatchTST_custom_contact_seq_len150_20251114_085215  
+Accuracy : 0.9505, Precision : 0.5090, Recall : 0.6554, F-score : 0.5730 
+
+PatchTST_custom_ring_n_heads4_20251114_085719  
+Accuracy : 0.9044, Precision : 0.2698, Recall : 0.7461, F-score : 0.3963 
+
+PatchTST_custom_ring_n_heads8_20251114_090003  
+Accuracy : 0.9415, Precision : 0.3873, Recall : 0.6740, F-score : 0.4919 
+
+PatchTST_custom_pcb_n_heads1_20251114_090305  
+Accuracy : 0.9692, Precision : 0.3184, Recall : 0.4101, F-score : 0.3585 
+
+PatchTST_custom_contact_seq_len200_20251114_085925  
+Accuracy : 0.9439, Precision : 0.4560, Recall : 0.5644, F-score : 0.5045 
+
+PatchTST_custom_pcb_n_heads2_20251114_090607  
+Accuracy : 0.9642, Precision : 0.2839, Recall : 0.4624, F-score : 0.3518 
+
+PatchTST_custom_pcb_n_heads4_20251114_090905  
+Accuracy : 0.9628, Precision : 0.3076, Recall : 0.6187, F-score : 0.4109 
+
+PatchTST_custom_pcb_n_heads8_20251114_091224  
+Accuracy : 0.9671, Precision : 0.3247, Recall : 0.5261, F-score : 0.4016 
+
+PatchTST_custom_contact_seq_len250_20251114_090858  
+Accuracy : 0.9449, Precision : 0.4651, Recall : 0.5931, F-score : 0.5213 
+
+PatchTST_custom_contact_n_heads1_20251114_092059  
+Accuracy : 0.9419, Precision : 0.4387, Recall : 0.5312, F-score : 0.4805 
+
+PatchTST_custom_contact_n_heads2_20251114_092329  
+Accuracy : 0.9439, Precision : 0.4571, Recall : 0.5852, F-score : 0.5133 
+
+PatchTST_custom_contact_n_heads4_20251114_092556  
+Accuracy : 0.9459, Precision : 0.4726, Recall : 0.5906, F-score : 0.5251 
+
+DLinear_custom_contact_seq_len50_20251114_094454  
+Accuracy : 0.9462, Precision : 0.4751, Recall : 0.5977, F-score : 0.5294 
+
+DLinear_custom_contact_seq_len100_20251114_094512  
+Accuracy : 0.9457, Precision : 0.4712, Recall : 0.5992, F-score : 0.5276 
+
+DLinear_custom_contact_n_heads1_20251114_094521  
+Accuracy : 0.9446, Precision : 0.4604, Recall : 0.5578, F-score : 0.5045 
+
+DLinear_custom_contact_seq_len150_20251114_094533  
+Accuracy : 0.9440, Precision : 0.4573, Recall : 0.5684, F-score : 0.5068 
+
+DLinear_custom_contact_n_heads2_20251114_094540  
+Accuracy : 0.9438, Precision : 0.4541, Recall : 0.5459, F-score : 0.4958 
+
+DLinear_custom_contact_n_heads4_20251114_094558  
+Accuracy : 0.9434, Precision : 0.4503, Recall : 0.5412, F-score : 0.4916 
+
+DLinear_custom_contact_seq_len200_20251114_094558  
+Accuracy : 0.9440, Precision : 0.4576, Recall : 0.5720, F-score : 0.5084 
+
+DLinear_custom_contact_n_heads8_20251114_094618  
+Accuracy : 0.9430, Precision : 0.4467, Recall : 0.5314, F-score : 0.4854 
+
+DLinear_custom_contact_seq_len250_20251114_094626  
+Accuracy : 0.9443, Precision : 0.4599, Recall : 0.5723, F-score : 0.5100 
+
+DLinear_custom_ring_n_heads1_20251114_094637  
+Accuracy : 0.9536, Precision : 0.4562, Recall : 0.5397, F-score : 0.4945 
+
+DLinear_custom_ring_n_heads2_20251114_094658  
+Accuracy : 0.9577, Precision : 0.4978, Recall : 0.6161, F-score : 0.5507 
+
+DLinear_custom_contact_seq_len300_20251114_094656  
+Accuracy : 0.9439, Precision : 0.4570, Recall : 0.5708, F-score : 0.5076 
+
+DLinear_custom_ring_n_heads4_20251114_094720  
+Accuracy : 0.9570, Precision : 0.4902, Recall : 0.5935, F-score : 0.5370 
+
+DLinear_custom_ring_seq_len50_20251114_094729  
+Accuracy : 0.9576, Precision : 0.4970, Recall : 0.6052, F-score : 0.5458 
+
+DLinear_custom_ring_n_heads8_20251114_094741  
+Accuracy : 0.9561, Precision : 0.4826, Recall : 0.6009, F-score : 0.5353 
+
+DLinear_custom_ring_seq_len100_20251114_094751  
+Accuracy : 0.9570, Precision : 0.4909, Recall : 0.5802, F-score : 0.5318 
+
+DLinear_custom_pcb_n_heads1_20251114_094802  
+Accuracy : 0.9735, Precision : 0.4045, Recall : 0.5528, F-score : 0.4672 
+
+DLinear_custom_ring_seq_len150_20251114_094816  
+Accuracy : 0.9542, Precision : 0.4617, Recall : 0.5299, F-score : 0.4935 
+
+DLinear_custom_pcb_n_heads2_20251114_094824  
+Accuracy : 0.9747, Precision : 0.4258, Recall : 0.5953, F-score : 0.4965 
+
+DLinear_custom_pcb_n_heads4_20251114_094849  
+Accuracy : 0.9739, Precision : 0.4138, Recall : 0.5801, F-score : 0.4830 
+
+DLinear_custom_ring_seq_len200_20251114_094844  
+Accuracy : 0.9559, Precision : 0.4797, Recall : 0.5598, F-score : 0.5167 
+
+PatchTST_custom_contact_seq_len50_20251114_094841  
+Accuracy : 0.9486, Precision : 0.4938, Recall : 0.5926, F-score : 0.5387 
+
+DLinear_custom_pcb_n_heads8_20251114_094947  
+Accuracy : 0.9733, Precision : 0.3989, Recall : 0.5370, F-score : 0.4578 
+
+DLinear_custom_ring_seq_len250_20251114_094947  
+Accuracy : 0.9579, Precision : 0.5001, Recall : 0.5971, F-score : 0.5443 
+
+DLinear_custom_ring_seq_len300_20251114_095048  
+Accuracy : 0.9557, Precision : 0.4782, Recall : 0.5552, F-score : 0.5138 
+
+DLinear_custom_pcb_seq_len50_20251114_095155  
+Accuracy : 0.9730, Precision : 0.3936, Recall : 0.5278, F-score : 0.4509 
+
+PatchTST_custom_contact_seq_len100_20251114_095034  
+Accuracy : 0.9515, Precision : 0.5193, Recall : 0.5503, F-score : 0.5343 
+
+DLinear_custom_pcb_seq_len100_20251114_095252  
+Accuracy : 0.9737, Precision : 0.4095, Recall : 0.5779, F-score : 0.4793 
+
+DLinear_custom_pcb_seq_len150_20251114_095345  
+Accuracy : 0.9740, Precision : 0.4125, Recall : 0.5572, F-score : 0.4741 
+
+DLinear_custom_pcb_seq_len200_20251114_095451  
+Accuracy : 0.9736, Precision : 0.4073, Recall : 0.5637, F-score : 0.4729 
+
+DLinear_custom_pcb_seq_len250_20251114_095557  
+Accuracy : 0.9729, Precision : 0.3907, Recall : 0.5180, F-score : 0.4454 
+
+DLinear_custom_pcb_seq_len300_20251114_095703  
+Accuracy : 0.9734, Precision : 0.4011, Recall : 0.5392, F-score : 0.4600 
+
+PatchTST_custom_contact_seq_len150_20251114_095333  
+Accuracy : 0.9496, Precision : 0.5017, Recall : 0.6427, F-score : 0.5635 
+
+PatchTST_custom_contact_seq_len200_20251114_095817  
+Accuracy : 0.9429, Precision : 0.4497, Recall : 0.5715, F-score : 0.5033 
+
+PatchTST_custom_contact_seq_len250_20251114_100352  
+Accuracy : 0.9412, Precision : 0.4418, Recall : 0.6141, F-score : 0.5139 
+
+PatchTST_custom_contact_seq_len300_20251114_101039  
+Accuracy : 0.9436, Precision : 0.4549, Recall : 0.5730, F-score : 0.5071 
+
+PatchTST_custom_ring_seq_len50_20251114_101850  
+Accuracy : 0.9533, Precision : 0.4591, Recall : 0.6175, F-score : 0.5266 
+
+PatchTST_custom_ring_seq_len100_20251114_102044  
+Accuracy : 0.9527, Precision : 0.4498, Recall : 0.5506, F-score : 0.4951 
+
+PatchTST_custom_ring_seq_len150_20251114_102353  
+Accuracy : 0.9440, Precision : 0.3830, Recall : 0.5413, F-score : 0.4486 
+
+PatchTST_custom_ring_seq_len200_20251114_102851  
+Accuracy : 0.9331, Precision : 0.3524, Recall : 0.7050, F-score : 0.4699 
+
+PatchTST_custom_ring_seq_len250_20251114_103524  
+Accuracy : 0.9336, Precision : 0.3534, Recall : 0.6925, F-score : 0.4679 
+
+PatchTST_custom_ring_seq_len300_20251114_104324  
+Accuracy : 0.9204, Precision : 0.3164, Recall : 0.7667, F-score : 0.4479 
+
+PatchTST_custom_pcb_seq_len50_20251114_105304  
+Accuracy : 0.9617, Precision : 0.2642, Recall : 0.4624, F-score : 0.3363 
+
+PatchTST_custom_pcb_seq_len100_20251114_105508  
+Accuracy : 0.9595, Precision : 0.2579, Recall : 0.4962, F-score : 0.3394 
+
+PatchTST_custom_pcb_seq_len150_20251114_105835  
+Accuracy : 0.9613, Precision : 0.2728, Recall : 0.5076, F-score : 0.3549 
+
+PatchTST_custom_pcb_seq_len200_20251114_110408  
+Accuracy : 0.9663, Precision : 0.3001, Recall : 0.4542, F-score : 0.3614 
+
+PatchTST_custom_pcb_seq_len250_20251114_111123  
+Accuracy : 0.9537, Precision : 0.2261, Recall : 0.4984, F-score : 0.3111 
+
+PatchTST_custom_pcb_seq_len300_20251114_112021  
+Accuracy : 0.9636, Precision : 0.2569, Recall : 0.3856, F-score : 0.3084 
+
+Linear_custom_contact_anormly_ratio1.0_20251114_153637  
+Accuracy : 0.9557, Precision : 0.6000, Recall : 0.3742, F-score : 0.4609 
+
+Linear_custom_contact_anormly_ratio2.0_20251114_153654  
+Accuracy : 0.9537, Precision : 0.5419, Recall : 0.5488, F-score : 0.5453 
+
+Linear_custom_contact_anormly_ratio3.0_20251114_153710  
+Accuracy : 0.9433, Precision : 0.4521, Recall : 0.5713, F-score : 0.5048 
+
+Linear_custom_contact_anormly_ratio4.0_20251114_153726  
+Accuracy : 0.9375, Precision : 0.4227, Recall : 0.6449, F-score : 0.5107 
+
+Linear_custom_contact_anormly_ratio5.0_20251114_153743  
+Accuracy : 0.9294, Precision : 0.3895, Recall : 0.6967, F-score : 0.4997 
+
+Linear_custom_contact_seq_len50_20251114_153744  
+Accuracy : 0.9453, Precision : 0.4684, Recall : 0.5943, F-score : 0.5239 
+
+Linear_custom_contact_anormly_ratio6.0_20251114_153758  
+Accuracy : 0.9212, Precision : 0.3626, Recall : 0.7366, F-score : 0.4860 
+
+Linear_custom_contact_seq_len100_20251114_153801  
+Accuracy : 0.9461, Precision : 0.4745, Recall : 0.6148, F-score : 0.5356 
+
+Linear_custom_contact_anormly_ratio7.0_20251114_153814  
+Accuracy : 0.9120, Precision : 0.3321, Recall : 0.7312, F-score : 0.4568 
+
+Linear_custom_contact_seq_len150_20251114_153820  
+Accuracy : 0.9448, Precision : 0.4651, Recall : 0.5911, F-score : 0.5206 
+
+Linear_custom_contact_anormly_ratio8.0_20251114_153829  
+Accuracy : 0.9059, Precision : 0.3277, Recall : 0.8180, F-score : 0.4680 
+
+Linear_custom_contact_anormly_ratio9.0_20251114_153844  
+Accuracy : 0.8940, Precision : 0.2992, Recall : 0.8149, F-score : 0.4376 
+
+Linear_custom_contact_seq_len200_20251114_153842  
+Accuracy : 0.9450, Precision : 0.4667, Recall : 0.6023, F-score : 0.5259 
+
+Linear_custom_contact_anormly_ratio10.0_20251114_153900  
+Accuracy : 0.8820, Precision : 0.2829, Recall : 0.8679, F-score : 0.4268 
+
+Linear_custom_contact_seq_len250_20251114_153906  
+Accuracy : 0.9437, Precision : 0.4561, Recall : 0.5803, F-score : 0.5108 
+
+Linear_custom_ring_anormly_ratio1.0_20251114_153916  
+Accuracy : 0.9663, Precision : 0.6682, Recall : 0.3931, F-score : 0.4950 
+
+Linear_custom_ring_anormly_ratio2.0_20251114_153933  
+Accuracy : 0.9606, Precision : 0.5327, Recall : 0.5139, F-score : 0.5231 
+
+Linear_custom_contact_seq_len300_20251114_153932  
+Accuracy : 0.9437, Precision : 0.4567, Recall : 0.5867, F-score : 0.5136 
+
+Linear_custom_ring_anormly_ratio3.0_20251114_153952  
+Accuracy : 0.9489, Precision : 0.4300, Recall : 0.6634, F-score : 0.5218 
+
+Linear_custom_ring_seq_len50_20251114_154001  
+Accuracy : 0.9443, Precision : 0.3953, Recall : 0.6115, F-score : 0.4802 
+
+Linear_custom_ring_anormly_ratio4.0_20251114_154009  
+Accuracy : 0.9310, Precision : 0.3492, Recall : 0.7414, F-score : 0.4748 
+
+Linear_custom_ring_seq_len100_20251114_154019  
+Accuracy : 0.9408, Precision : 0.3714, Recall : 0.5867, F-score : 0.4548 
+
+Linear_custom_ring_anormly_ratio5.0_20251114_154026  
+Accuracy : 0.9246, Precision : 0.3252, Recall : 0.7384, F-score : 0.4515 
+
+Linear_custom_ring_anormly_ratio6.0_20251114_154043  
+Accuracy : 0.9164, Precision : 0.3040, Recall : 0.7675, F-score : 0.4355 
+
+Linear_custom_ring_seq_len150_20251114_154041  
+Accuracy : 0.9450, Precision : 0.4016, Recall : 0.6270, F-score : 0.4896 
+
+Linear_custom_ring_anormly_ratio7.0_20251114_154101  
+Accuracy : 0.8874, Precision : 0.2470, Recall : 0.8195, F-score : 0.3796 
+
+Linear_custom_ring_seq_len200_20251114_154106  
+Accuracy : 0.9449, Precision : 0.3955, Recall : 0.5848, F-score : 0.4719 
+
+Linear_custom_ring_anormly_ratio8.0_20251114_154118  
+Accuracy : 0.8811, Precision : 0.2351, Recall : 0.8116, F-score : 0.3646 
+
+Linear_custom_ring_anormly_ratio9.0_20251114_154135  
+Accuracy : 0.8759, Precision : 0.2293, Recall : 0.8263, F-score : 0.3590 
+
+Linear_custom_ring_seq_len250_20251114_154132  
+Accuracy : 0.9448, Precision : 0.3946, Recall : 0.5805, F-score : 0.4699 
+
+Linear_custom_ring_anormly_ratio10.0_20251114_154153  
+Accuracy : 0.8540, Precision : 0.2043, Recall : 0.8543, F-score : 0.3298 
+
+Linear_custom_pcb_anormly_ratio1.0_20251114_154211  
+Accuracy : 0.9802, Precision : 0.5446, Recall : 0.3459, F-score : 0.4231 
+
+Linear_custom_ring_seq_len300_20251114_154202  
+Accuracy : 0.9455, Precision : 0.4005, Recall : 0.5927, F-score : 0.4780 
+
+Linear_custom_pcb_anormly_ratio2.0_20251114_154229  
+Accuracy : 0.9780, Precision : 0.4755, Recall : 0.4657, F-score : 0.4706 
+
+Linear_custom_pcb_seq_len50_20251114_154235  
+Accuracy : 0.9731, Precision : 0.3998, Recall : 0.5605, F-score : 0.4667 
+
+Linear_custom_pcb_anormly_ratio3.0_20251114_154247  
+Accuracy : 0.9726, Precision : 0.3903, Recall : 0.5463, F-score : 0.4553 
+
+Linear_custom_pcb_seq_len100_20251114_154254  
+Accuracy : 0.9727, Precision : 0.3845, Recall : 0.5038, F-score : 0.4361 
+
+Linear_custom_pcb_anormly_ratio4.0_20251114_154304  
+Accuracy : 0.9691, Precision : 0.3642, Recall : 0.6340, F-score : 0.4626 
+
+Linear_custom_pcb_anormly_ratio5.0_20251114_154322  
+Accuracy : 0.9654, Precision : 0.3430, Recall : 0.7108, F-score : 0.4627 
+
+Linear_custom_pcb_seq_len150_20251114_154315  
+Accuracy : 0.9734, Precision : 0.4044, Recall : 0.5621, F-score : 0.4704 
+
+Linear_custom_pcb_anormly_ratio6.0_20251114_154340  
+Accuracy : 0.9581, Precision : 0.2936, Recall : 0.7092, F-score : 0.4152 
+
+Linear_custom_pcb_seq_len200_20251114_154341  
+Accuracy : 0.9723, Precision : 0.3804, Recall : 0.5065, F-score : 0.4345 
+
+Linear_custom_pcb_anormly_ratio7.0_20251114_154359  
+Accuracy : 0.9541, Precision : 0.2767, Recall : 0.7358, F-score : 0.4021 
+
+Linear_custom_pcb_anormly_ratio8.0_20251114_154417  
+Accuracy : 0.9484, Precision : 0.2513, Recall : 0.7375, F-score : 0.3748 
+
+Linear_custom_pcb_seq_len250_20251114_154409  
+Accuracy : 0.9736, Precision : 0.4064, Recall : 0.5583, F-score : 0.4704 
+
+Linear_custom_pcb_anormly_ratio9.0_20251114_154435  
+Accuracy : 0.9434, Precision : 0.2401, Recall : 0.7838, F-score : 0.3676 
+
+Linear_custom_pcb_anormly_ratio10.0_20251114_154453  
+Accuracy : 0.9386, Precision : 0.2283, Recall : 0.8083, F-score : 0.3561 
+
+Linear_custom_pcb_seq_len300_20251114_154440  
+Accuracy : 0.9745, Precision : 0.4255, Recall : 0.6019, F-score : 0.4985 
+
+TLinear_custom_contact_seq_len50_20251114_163334  
+Accuracy : 0.9494, Precision : 0.0000, Recall : 0.0000, F-score : 0.0000 
+
+TLinear_custom_contact_seq_len100_20251114_163354  
+Accuracy : 0.9494, Precision : 0.0000, Recall : 0.0000, F-score : 0.0000 
+
+PatchTST_custom_contact_seq_len50_20251115_062846  
+Accuracy : 0.9462, Precision : 0.4747, Recall : 0.5847, F-score : 0.5240 
+
+PatchTST_custom_contact_seq_len100_20251115_063024  
+Accuracy : 0.9499, Precision : 0.5044, Recall : 0.5774, F-score : 0.5384 
+
+PatchTST_custom_contact_e_layers1_20251115_063901  
+Accuracy : 0.9443, Precision : 0.4589, Recall : 0.5610, F-score : 0.5048 
+
+PatchTST_custom_contact_e_layers3_20251115_063955  
+Accuracy : 0.9444, Precision : 0.4599, Recall : 0.5625, F-score : 0.5061 
+
+PatchTST_custom_contact_e_layers5_20251115_064154  
+Accuracy : 0.9386, Precision : 0.4145, Recall : 0.5199, F-score : 0.4613 
+
+PatchTST_custom_contact_e_layers7_20251115_064419  
+Accuracy : 0.9369, Precision : 0.4021, Recall : 0.5060, F-score : 0.4481 
+
+PatchTST_custom_contact_e_layers9_20251115_064724  
+Accuracy : 0.9378, Precision : 0.4148, Recall : 0.5605, F-score : 0.4768 
+
+PatchTST_custom_contact_e_layers1_20251115_065635  
+Accuracy : 0.9540, Precision : 0.5426, Recall : 0.5747, F-score : 0.5582 
+
+PatchTST_custom_contact_e_layers3_20251115_065823  
+Accuracy : 0.9508, Precision : 0.5125, Recall : 0.5708, F-score : 0.5401 
+
+PatchTST_custom_contact_seq_len20_20251115_070152  
+Accuracy : 0.9387, Precision : 0.4185, Recall : 0.5432, F-score : 0.4728 
+
+PatchTST_custom_contact_seq_len40_20251115_070509  
+Accuracy : 0.9458, Precision : 0.4699, Recall : 0.5576, F-score : 0.5100 
+
+PatchTST_custom_contact_seq_len60_20251115_070844  
+Accuracy : 0.9501, Precision : 0.5062, Recall : 0.5789, F-score : 0.5401 
+
+PatchTST_custom_contact_e_layers5_20251115_070330  
+Accuracy : 0.9479, Precision : 0.4878, Recall : 0.5757, F-score : 0.5281 
+
+PatchTST_custom_contact_seq_len80_20251115_071256  
+Accuracy : 0.9525, Precision : 0.5290, Recall : 0.5647, F-score : 0.5463 
+
+PatchTST_custom_contact_seq_len100_20251115_071909  
+Accuracy : 0.9496, Precision : 0.5020, Recall : 0.5532, F-score : 0.5264 
+
+PatchTST_custom_contact_e_layers7_20251115_071257  
+Accuracy : 0.9455, Precision : 0.4688, Recall : 0.5728, F-score : 0.5156 
+
+PatchTST_custom_contact_seq_len120_20251115_072633  
+Accuracy : 0.9516, Precision : 0.5197, Recall : 0.5867, F-score : 0.5512 
+
+PatchTST_custom_contact_seq_len140_20251115_073510  
+Accuracy : 0.9488, Precision : 0.4950, Recall : 0.6009, F-score : 0.5428 
+
+PatchTST_custom_contact_e_layers9_20251115_072811  
+Accuracy : 0.9475, Precision : 0.4847, Recall : 0.6038, F-score : 0.5377 
+
+PatchTST_custom_ring_seq_len20_20251115_074512  
+Accuracy : 0.9511, Precision : 0.4371, Recall : 0.5696, F-score : 0.4946 
+
+PatchTST_custom_ring_seq_len40_20251115_074859  
+Accuracy : 0.9400, Precision : 0.3800, Recall : 0.6759, F-score : 0.4865 
+
+PatchTST_custom_ring_seq_len60_20251115_075356  
+Accuracy : 0.9607, Precision : 0.5338, Recall : 0.5106, F-score : 0.5220 
+
+PatchTST_custom_ring_seq_len80_20251115_075947  
+Accuracy : 0.9468, Precision : 0.4167, Recall : 0.6631, F-score : 0.5118 
+
+PatchTST_custom_contact_e_layers11_20251115_074552  
+Accuracy : 0.9432, Precision : 0.4518, Recall : 0.5767, F-score : 0.5067 
+
+PatchTST_custom_ring_e_layers1_20251115_080842  
+Accuracy : 0.9463, Precision : 0.4058, Recall : 0.5927, F-score : 0.4818 
+
+PatchTST_custom_ring_seq_len100_20251115_080745  
+Accuracy : 0.9464, Precision : 0.3991, Recall : 0.5397, F-score : 0.4589 
+
+PatchTST_custom_ring_e_layers3_20251115_081126  
+Accuracy : 0.9410, Precision : 0.3816, Recall : 0.6460, F-score : 0.4798 
+
+PatchTST_custom_ring_seq_len120_20251115_081507  
+Accuracy : 0.9455, Precision : 0.3967, Recall : 0.5685, F-score : 0.4673 
+
+PatchTST_custom_ring_e_layers5_20251115_081852  
+Accuracy : 0.9243, Precision : 0.3230, Recall : 0.7289, F-score : 0.4476 
+
+PatchTST_custom_ring_seq_len140_20251115_082407  
+Accuracy : 0.9532, Precision : 0.4504, Recall : 0.5038, F-score : 0.4756 
+
+PatchTST_custom_pcb_seq_len20_20251115_083519  
+Accuracy : 0.9689, Precision : 0.3246, Recall : 0.4439, F-score : 0.3750 
+
+PatchTST_custom_pcb_seq_len40_20251115_083846  
+Accuracy : 0.9620, Precision : 0.2774, Recall : 0.5044, F-score : 0.3579 
+
+PatchTST_custom_ring_e_layers7_20251115_083002  
+Accuracy : 0.9460, Precision : 0.4067, Recall : 0.6161, F-score : 0.4900 
+
+PatchTST_custom_pcb_seq_len60_20251115_084311  
+Accuracy : 0.9619, Precision : 0.2710, Recall : 0.4837, F-score : 0.3473 
+
+PatchTST_custom_pcb_seq_len80_20251115_084937  
+Accuracy : 0.9648, Precision : 0.3019, Recall : 0.5153, F-score : 0.3807 
+
+PatchTST_custom_ring_e_layers9_20251115_084415  
+Accuracy : 0.9377, Precision : 0.3625, Recall : 0.6338, F-score : 0.4612 
+
+PatchTST_custom_pcb_seq_len100_20251115_085659  
+Accuracy : 0.9636, Precision : 0.2918, Recall : 0.5158, F-score : 0.3728 
+
+PatchTST_custom_pcb_seq_len120_20251115_090510  
+Accuracy : 0.9644, Precision : 0.3040, Recall : 0.5392, F-score : 0.3888 
+
+PatchTST_custom_pcb_seq_len140_20251115_091606  
+Accuracy : 0.9606, Precision : 0.2624, Recall : 0.4853, F-score : 0.3407 
+
+PatchTST_custom_ring_e_layers11_20251115_090352  
+Accuracy : 0.9470, Precision : 0.4113, Recall : 0.6025, F-score : 0.4889 
+
+PatchTST_custom_pcb_e_layers1_20251115_092922  
+Accuracy : 0.9616, Precision : 0.2751, Recall : 0.5065, F-score : 0.3566 
+
+PatchTST_custom_pcb_e_layers3_20251115_093124  
+Accuracy : 0.9638, Precision : 0.2873, Recall : 0.4891, F-score : 0.3620 
+
+PatchTST_custom_pcb_e_layers5_20251115_093750  
+Accuracy : 0.9617, Precision : 0.2772, Recall : 0.5142, F-score : 0.3602 
+
+PatchTST_custom_contact_seq_len20_20251115_094956  
+Accuracy : 0.9456, Precision : 0.4690, Recall : 0.5742, F-score : 0.5163 
+
+PatchTST_custom_contact_seq_len40_20251115_095256  
+Accuracy : 0.9446, Precision : 0.4621, Recall : 0.5779, F-score : 0.5135 
+
+PatchTST_custom_contact_seq_len60_20251115_095527  
+Accuracy : 0.9513, Precision : 0.5179, Recall : 0.5363, F-score : 0.5270 
+
+PatchTST_custom_contact_seq_len80_20251115_095807  
+Accuracy : 0.9463, Precision : 0.4737, Recall : 0.5427, F-score : 0.5059 
+
+PatchTST_custom_pcb_e_layers7_20251115_094626  
+Accuracy : 0.9639, Precision : 0.2972, Recall : 0.5272, F-score : 0.3801 
+
+PatchTST_custom_contact_seq_len100_20251115_100211  
+Accuracy : 0.9493, Precision : 0.4991, Recall : 0.5696, F-score : 0.5320 
+
+PatchTST_custom_contact_seq_len120_20251115_100454  
+Accuracy : 0.9432, Precision : 0.4517, Recall : 0.5718, F-score : 0.5047 
+
+PatchTST_custom_contact_seq_len140_20251115_100739  
+Accuracy : 0.9434, Precision : 0.4543, Recall : 0.5882, F-score : 0.5126 
+
+PatchTST_custom_ring_seq_len20_20251115_101116  
+Accuracy : 0.9508, Precision : 0.4312, Recall : 0.5370, F-score : 0.4783 
+
+PatchTST_custom_ring_seq_len40_20251115_101226  
+Accuracy : 0.9574, Precision : 0.4934, Recall : 0.4549, F-score : 0.4733 
+
+PatchTST_custom_ring_seq_len60_20251115_101401  
+Accuracy : 0.9619, Precision : 0.5698, Recall : 0.3839, F-score : 0.4587 
+
+PatchTST_custom_ring_seq_len80_20251115_101606  
+Accuracy : 0.9588, Precision : 0.5153, Recall : 0.3521, F-score : 0.4183 
+
+PatchTST_custom_ring_seq_len100_20251115_101848  
+Accuracy : 0.9487, Precision : 0.4131, Recall : 0.5220, F-score : 0.4612 
+
+PatchTST_custom_ring_seq_len120_20251115_102200  
+Accuracy : 0.9573, Precision : 0.4930, Recall : 0.5430, F-score : 0.5168 
+
+PatchTST_custom_ring_seq_len140_20251115_102535  
+Accuracy : 0.9566, Precision : 0.4882, Recall : 0.6566, F-score : 0.5600 
+
+PatchTST_custom_pcb_seq_len20_20251115_103001  
+Accuracy : 0.9709, Precision : 0.3364, Recall : 0.3981, F-score : 0.3647 
+
+PatchTST_custom_pcb_seq_len40_20251115_103202  
+Accuracy : 0.9651, Precision : 0.2895, Recall : 0.4553, F-score : 0.3539 
+
+PatchTST_custom_pcb_seq_len60_20251115_103403  
+Accuracy : 0.9712, Precision : 0.3533, Recall : 0.4461, F-score : 0.3943 
+
+PatchTST_custom_pcb_seq_len80_20251115_103612  
+Accuracy : 0.9688, Precision : 0.3412, Recall : 0.5229, F-score : 0.4129 
+
+PatchTST_custom_pcb_seq_len100_20251115_103856  
+Accuracy : 0.9684, Precision : 0.3113, Recall : 0.4183, F-score : 0.3570 
+
+PatchTST_custom_pcb_seq_len120_20251115_104201  
+Accuracy : 0.9698, Precision : 0.3462, Recall : 0.4929, F-score : 0.4067 
+
+PatchTST_custom_pcb_seq_len140_20251115_104536  
+Accuracy : 0.9725, Precision : 0.3813, Recall : 0.4995, F-score : 0.4324 
+

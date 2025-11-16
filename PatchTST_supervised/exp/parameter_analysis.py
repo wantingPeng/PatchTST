@@ -22,7 +22,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # ============================================================================
 
 # Select which parameter to analyze (choose one: 'win_size', 'k', 'anormly_ratio')
-PARAM_TO_ANALYZE = 'patch_len'  # Change this to 'k' or 'anormly_ratio' for other analyses
+PARAM_TO_ANALYZE = 'seq_len'  # Change this to 'k' or 'anormly_ratio' for other analyses
 
 # Datasets to test
 DATASETS = ['contact', 'ring', 'pcb']
@@ -32,11 +32,11 @@ DATASETS = ['contact', 'ring', 'pcb']
 # For d_model=[128, 256, 512, 1024], valid n_heads are powers of 2: [1, 2, 4, 8, 16, 32]
 PARAM_VALUES = {
     'n_heads': [1, 2, 4, 8],  # Changed from [1,3,5,7] to ensure divisibility with d_model
-    'e_layers': [1,3,5,7],
+    'e_layers': [1,3,5,7,9,11],
     'anormly_ratio': [1.0, 2.0, 3.0, 4.0, 5.0, 6.0,7.0,8.0,9.0,10.0],
     'patch_len': [10,16,22,28,34],
     # seq_len and pred_len should change together for anomaly detection (reconstruction task)
-    'seq_len': [50,100,150,200,250,300],  # When analyzing seq_len, pred_len will be set to the same value
+    'seq_len': [20,40,60,80,100,120,140],  # When analyzing seq_len, pred_len will be set to the same value
     'kernel_size': [5,15,25,35,45,55,65,75,85],
 }
 
@@ -45,15 +45,15 @@ FIXED_PARAMS = {
     'train_epochs': 1,
     'batch_size': 64,
     'learning_rate': 1e-4,
-    'seq_len': 30,
-    'pred_len': 30,
-    'n_heads': 4,
+    'seq_len': 100,
+    'pred_len': 100,
+    'n_heads': 2,
     'e_layers': 3,
     'd_model': 256,
     'd_ff': 512,
     'kernel_size': 25,
-    'patch_len': 16,
-    'stride': 8,
+    'patch_len': 10,
+    'stride': 5,
     'anormly_ratio': 3.0,
     'model': 'PatchTST',
     'data': 'custom',
@@ -62,7 +62,7 @@ FIXED_PARAMS = {
 }
 
 # Output configuration
-OUTPUT_DIR = 'experiments/results_pca/patchtst1'
+OUTPUT_DIR = 'experiments/results/PatchTST2_pca'
 PLOT_STYLE = 'seaborn-v0_8-darkgrid'
 
 # ============================================================================
@@ -153,7 +153,7 @@ def run_single_experiment(dataset_name, param_name, param_value, fixed_params):
     # Then setting = PatchTST_custom_experiment_id
     # And path = checkpoints_n_heads_analysis/PatchTST_custom_experiment_id/
     
-    checkpoints_parent = f'checkpoints2_{param_name}_analysis_pca'
+    checkpoints_parent = f'checkpoints2_{param_name}_analysis_PatchTST_pca'
     setting = f"{params['model']}_{params['data']}_{experiment_id}"
     model_save_path = os.path.join(checkpoints_parent, setting)
     
