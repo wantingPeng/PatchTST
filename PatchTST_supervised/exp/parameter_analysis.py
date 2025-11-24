@@ -22,10 +22,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # ============================================================================
 
 # Select which parameter to analyze (choose one: 'win_size', 'k', 'anormly_ratio')
-PARAM_TO_ANALYZE = 'seq_len'  # Change this to 'k' or 'anormly_ratio' for other analyses
+PARAM_TO_ANALYZE = 'patch_len'  # Change this to 'k' or 'anormly_ratio' for other analyses
 
 # Datasets to test
-DATASETS = ['contact', 'ring', 'pcb']
+DATASETS = ['contact']
 
 # Parameter values to test (modify based on PARAM_TO_ANALYZE)
 # Note: n_heads must be divisors of d_model for Transformer models
@@ -36,13 +36,13 @@ PARAM_VALUES = {
     'anormly_ratio': [1.0, 2.0, 3.0, 4.0, 5.0, 6.0,7.0,8.0,9.0,10.0],
     'patch_len': [10,16,22,28,34],
     # seq_len and pred_len should change together for anomaly detection (reconstruction task)
-    'seq_len': [20,40,60,80,100,120,140],  # When analyzing seq_len, pred_len will be set to the same value
+    'seq_len': [50,100,150,200,250,300],  # When analyzing seq_len, pred_len will be set to the same value
     'kernel_size': [5,15,25,35,45,55,65,75,85],
 }
 
 # Fixed parameters (used when not being analyzed)
 FIXED_PARAMS = {
-    'train_epochs': 1,
+    'train_epochs': 3,
     'batch_size': 64,
     'learning_rate': 1e-4,
     'seq_len': 100,
@@ -62,7 +62,7 @@ FIXED_PARAMS = {
 }
 
 # Output configuration
-OUTPUT_DIR = 'experiments/results/PatchTST2_pca'
+OUTPUT_DIR = 'experiments/patchtst1'
 PLOT_STYLE = 'seaborn-v0_8-darkgrid'
 
 # ============================================================================
@@ -89,6 +89,27 @@ DATASET_CONFIGS = {
         'c_out': 10,
      }
 }
+# DATASET_CONFIGS = {
+#      'contact': {
+#          'data_path': 'dataset/dataset/downsampleData_scratch_1minut/contact/contact_cleaned_1minut_20250928_172122.parquet',
+#          'enc_in': 27,
+#          'dec_in': 27,
+#          'c_out': 27,
+
+#      },
+#     'ring': {
+#         'data_path': 'dataset/dataset/downsampleData_scratch_1minut/ring/Ring_cleaned_1minut_20250928_170147.parquet',
+#         'enc_in': 28,
+#         'dec_in': 28,
+#         'c_out': 28,
+#     },
+#      'pcb': {
+#          'data_path': 'dataset/dataset/downsampleData_scratch_1minut/pcb/pcb_cleaned_1minut_20250928_161509.parquet',
+#          'enc_in': 31,
+#          'dec_in': 31,
+#          'c_out': 31,
+#      }
+# }
 
 # Plot styling
 PLOT_CONFIG = {
@@ -153,7 +174,7 @@ def run_single_experiment(dataset_name, param_name, param_value, fixed_params):
     # Then setting = PatchTST_custom_experiment_id
     # And path = checkpoints_n_heads_analysis/PatchTST_custom_experiment_id/
     
-    checkpoints_parent = f'checkpoints2_{param_name}_analysis_PatchTST_pca'
+    checkpoints_parent = f'checkpoints2_{param_name}_{params['model']}__pca'
     setting = f"{params['model']}_{params['data']}_{experiment_id}"
     model_save_path = os.path.join(checkpoints_parent, setting)
     
@@ -175,7 +196,7 @@ def run_single_experiment(dataset_name, param_name, param_value, fixed_params):
         '--learning_rate', str(params['learning_rate']),
         '--anormly_ratio', str(params['anormly_ratio']),
         '--train_epochs', str(params['train_epochs']),
-        '--patience', '10',
+        '--patience', '3',
         '--n_heads', str(params['n_heads']),
         '--d_model', str(params['d_model']),
         '--e_layers', str(params['e_layers']),
@@ -183,7 +204,8 @@ def run_single_experiment(dataset_name, param_name, param_value, fixed_params):
         '--patch_len', str(params['patch_len']),
         '--stride', str(params['stride']),
         '--des', experiment_id,
-        '--checkpoints', checkpoints_parent
+        '--checkpoints', checkpoints_parent,
+        '--lradj', 'type1'
     ]
     
     print(f"\n{'='*80}")
@@ -331,26 +353,6 @@ def plot_results(results, param_name, output_dir=OUTPUT_DIR):
             all_param_vals.append(pv)
             all_f1_scores.append(metrics['f_score'] * 100)
     
-    # Ensure x-axis always shows configured parameter values
-    configured_param_vals = PARAM_VALUES.get(param_name, [])
-    if configured_param_vals:
-        # Convert configured values to same type as experiment outputs when possible
-        normalized_config_vals = []
-        for val in configured_param_vals:
-            if isinstance(val, (int, float)):
-                normalized_config_vals.append(val)
-            else:
-                try:
-                    # Attempt numeric conversion (covers cases like "10")
-                    numeric_val = float(val)
-                    # Cast back to int if it represents an integer value
-                    if numeric_val.is_integer():
-                        numeric_val = int(numeric_val)
-                    normalized_config_vals.append(numeric_val)
-                except (TypeError, ValueError):
-                    normalized_config_vals.append(val)
-        all_param_vals.extend(normalized_config_vals)
-
     if all_param_vals:
         x_min, x_max = min(all_param_vals), max(all_param_vals)
         x_range = x_max - x_min

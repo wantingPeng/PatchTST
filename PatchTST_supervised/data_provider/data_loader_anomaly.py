@@ -62,7 +62,7 @@ class CustomLoader(object):
         # 控制参数
         downsample = False  # 是否通过下采样调整异常比例到20%
         onlyNormalData = True  # 是否仅保留训练集中的正常数据（标签=0）
-        use_pca = True  # 是否使用PCA降维（仅在训练集上fit，对val/test仅transform）
+        use_pca = True # 是否使用PCA降维（仅在训练集上fit，对val/test仅transform）
         pca_n_components = 10  # PCA降维维度：整数=具体维度，0-1浮点数=保留方差比例，None=保留所有成分
         
         # 参数冲突检查

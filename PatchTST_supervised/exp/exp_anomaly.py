@@ -1,4 +1,4 @@
-from models import PatchTST, Autoformer, Transformer, Informer, DLinear, NLinear, Linear
+from models import PatchTST, DLinear
 from exp.exp_basic import Exp_Basic
 from data_provider.data_loader_anomaly import get_anomaly_loader
 from utils.tools import adjust_learning_rate, adjustment
@@ -21,7 +21,12 @@ warnings.filterwarnings('ignore')
 
 
 class EarlyStopping:
-    def __init__(self, patience=7, verbose=False, dataset_name='', delta=0, metadata=None, mode='min'):
+    """
+    Custom EarlyStopping class for anomaly detection tasks.
+    Supports both 'min' mode (for loss) and 'max' mode (for F1 score).
+    Saves model checkpoint and configuration when validation metric improves.
+    """
+    def __init__(self, patience=3, verbose=False, dataset_name='', delta=0, metadata=None, mode='min'):
         self.patience = patience
         self.verbose = verbose
         self.counter = 0
@@ -98,13 +103,9 @@ class Exp_Anomaly_Detection(Exp_Basic):
         self.latest_checkpoint_dir = None
 
     def _build_model(self):
+        """Build model for anomaly detection. Only supports DLinear and PatchTST."""
         model_dict = {
-            'Autoformer': Autoformer,
-            'Transformer': Transformer,
-            'Informer': Informer,
             'DLinear': DLinear,
-            'NLinear': NLinear,
-            'Linear': Linear,
             'PatchTST': PatchTST,
         }
         model = model_dict[self.args.model].Model(self.args).float()
@@ -126,24 +127,15 @@ class Exp_Anomaly_Detection(Exp_Basic):
         return criterion
 
     def vali(self, vali_data, vali_loader, criterion):
+        """Validate reconstruction loss on validation set."""
         total_loss = []
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, _) in enumerate(vali_loader):
                 batch_x = batch_x.float().to(self.device)
-
-                if ('Linear' in self.args.model) or ('TST' in self.args.model):
-                    outputs = self.model(batch_x)
-                else:
-                    # Create decoder input and dummy time marks for encoder-decoder models
-                    dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
-                                         dtype=torch.float, device=self.device)
-                    # Create dummy time marks (zeros) for models that need temporal embeddings
-                    batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
-                                               dtype=torch.float, device=self.device)
-                    batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
-                                               dtype=torch.float, device=self.device)
-                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                
+                # Forward pass: both DLinear and PatchTST support direct reconstruction
+                outputs = self.model(batch_x)
 
                 f_dim = -1 if self.args.features == 'MS' else 0
                 outputs = outputs[:, :, f_dim:]
@@ -157,47 +149,29 @@ class Exp_Anomaly_Detection(Exp_Basic):
         return total_loss
     
     def evaluate_anomaly_detection(self, train_loader, vali_loader):
-        """在验证集上评估异常检测性能（用于early stopping）"""
+        """Evaluate anomaly detection performance on validation set (used for early stopping)."""
         self.model.eval()
         self.anomaly_criterion = nn.MSELoss(reduce=False)
         
-        # (1) 计算训练集的重建误差（用于确定阈值）
+        # (1) Calculate reconstruction errors on training set (for threshold determination)
         train_energy = []
         with torch.no_grad():
             for i, (batch_x, batch_y) in enumerate(train_loader):
                 batch_x = batch_x.float().to(self.device)
-                if ('Linear' in self.args.model) or ('TST' in self.args.model):
-                    outputs = self.model(batch_x)
-                else:
-                    dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
-                                         dtype=torch.float, device=self.device)
-                    batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
-                                               dtype=torch.float, device=self.device)
-                    batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
-                                               dtype=torch.float, device=self.device)
-                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                outputs = self.model(batch_x)
                 
                 score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
                 train_energy.append(score.detach().cpu().numpy())
         
         train_energy = np.concatenate(train_energy, axis=0).reshape(-1)
         
-        # (2) 计算验证集的重建误差和标签
+        # (2) Calculate reconstruction errors and labels on validation set
         vali_energy = []
         vali_labels = []
         with torch.no_grad():
             for i, (batch_x, batch_y) in enumerate(vali_loader):
                 batch_x = batch_x.float().to(self.device)
-                if ('Linear' in self.args.model) or ('TST' in self.args.model):
-                    outputs = self.model(batch_x)
-                else:
-                    dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
-                                         dtype=torch.float, device=self.device)
-                    batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
-                                               dtype=torch.float, device=self.device)
-                    batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
-                                               dtype=torch.float, device=self.device)
-                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                outputs = self.model(batch_x)
                 
                 score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
                 vali_energy.append(score.detach().cpu().numpy())
@@ -206,12 +180,16 @@ class Exp_Anomaly_Detection(Exp_Basic):
         vali_energy = np.concatenate(vali_energy, axis=0).reshape(-1)
         vali_labels = np.concatenate(vali_labels, axis=0).reshape(-1).astype(int)
         
+        # (3) Determine threshold based on training set reconstruction errors
         threshold = np.percentile(train_energy, 100 - self.args.anormly_ratio)
         
+        # (4) Predict anomalies on validation set
         pred = (vali_energy > threshold).astype(int)
         
+        # (5) Apply point adjustment strategy
         gt, pred = adjustment(vali_labels, pred)
         
+        # (6) Calculate metrics
         precision, recall, f_score, _ = precision_recall_fscore_support(gt, pred, average='binary', zero_division=0)
         accuracy = accuracy_score(gt, pred)
         
@@ -230,7 +208,7 @@ class Exp_Anomaly_Detection(Exp_Basic):
         time_now = time.time()
 
         train_steps = len(train_loader)
-        # 使用新的EarlyStopping，mode='max'表示F1越大越好
+        # 使用新的EarlyStopping，mode='Threshold: 0.000000'表示F1越大越好
         early_stopping = EarlyStopping(patience=self.args.patience, verbose=True, 
                                       dataset_name=setting, metadata=self.run_config, mode='max')
 
@@ -248,19 +226,9 @@ class Exp_Anomaly_Detection(Exp_Basic):
                 model_optim.zero_grad()
 
                 batch_x = batch_x.float().to(self.device)
-
-                if ('Linear' in self.args.model) or ('TST' in self.args.model):
-                    outputs = self.model(batch_x)
-                else:
-                    # Create decoder input and dummy time marks for encoder-decoder models
-                    dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
-                                         dtype=torch.float, device=self.device)
-                    # Create dummy time marks (zeros) for models that need temporal embeddings
-                    batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
-                                               dtype=torch.float, device=self.device)
-                    batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
-                                               dtype=torch.float, device=self.device)
-                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                
+                # Forward pass: both DLinear and PatchTST support direct reconstruction
+                outputs = self.model(batch_x)
 
                 f_dim = -1 if self.args.features == 'MS' else 0
                 outputs = outputs[:, :, f_dim:]
@@ -285,9 +253,10 @@ class Exp_Anomaly_Detection(Exp_Basic):
             # 在验证集上评估异常检测性能
             vali_f1, vali_acc, vali_precision, vali_recall, vali_threshold = self.evaluate_anomaly_detection(train_loader, vali_loader)
 
-            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f}".format(
+            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.4e} Vali Loss: {3:.4e}".format(
                 epoch + 1, train_steps, train_loss, vali_loss))
-            print("Vali Anomaly Detection | F1: {0:.4f} Precision: {1:.4f} Recall: {2:.4f} Threshold: {3:.6f}".format(
+
+            print("Vali Anomaly Detection | F1: {0:.4f} Precision: {1:.4f} Recall: {2:.4f} Threshold: {3:.12e}".format(
                 vali_f1, vali_precision, vali_recall, vali_threshold))
             
             # 使用F1 score进行early stopping（而不是loss）
@@ -334,24 +303,13 @@ class Exp_Anomaly_Detection(Exp_Basic):
         self.model.eval()
         self.anomaly_criterion = nn.MSELoss(reduce=False)
         attens_energy = []
-        # (1) stastic on the train set
+        # (1) Calculate reconstruction errors on training set
         with torch.no_grad():
             for i, (batch_x, batch_y) in enumerate(train_loader):
                 batch_x = batch_x.float().to(self.device)
-                # reconstruction
-                if ('Linear' in self.args.model) or ('TST' in self.args.model):
-                    outputs = self.model(batch_x)
-                else:
-                    # Create decoder input and dummy time marks for encoder-decoder models
-                    dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
-                                         dtype=torch.float, device=self.device)
-                    # Create dummy time marks (zeros) for models that need temporal embeddings
-                    batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
-                                               dtype=torch.float, device=self.device)
-                    batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
-                                               dtype=torch.float, device=self.device)
-                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-                # criterion
+                # Reconstruction
+                outputs = self.model(batch_x)
+                # Compute reconstruction error
                 score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
                 score = score.detach().cpu().numpy()
                 attens_energy.append(score)
@@ -359,25 +317,14 @@ class Exp_Anomaly_Detection(Exp_Basic):
         attens_energy = np.concatenate(attens_energy, axis=0).reshape(-1)
         train_energy = np.array(attens_energy)
 
-        # (2) find the threshold
+        # (2) Calculate reconstruction errors on test set
         attens_energy = []
         test_labels = []
         for i, (batch_x, batch_y) in enumerate(test_loader):
             batch_x = batch_x.float().to(self.device)
-            # reconstruction
-            if ('Linear' in self.args.model) or ('TST' in self.args.model):
-                outputs = self.model(batch_x)
-            else:
-                # Create decoder input and dummy time marks for encoder-decoder models
-                dec_inp = torch.zeros([batch_x.shape[0], self.args.pred_len, batch_x.shape[2]], 
-                                     dtype=torch.float, device=self.device)
-                # Create dummy time marks (zeros) for models that need temporal embeddings
-                batch_x_mark = torch.zeros([batch_x.shape[0], batch_x.shape[1], 1], 
-                                           dtype=torch.float, device=self.device)
-                batch_y_mark = torch.zeros([batch_x.shape[0], self.args.pred_len, 1], 
-                                           dtype=torch.float, device=self.device)
-                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-            # criterion
+            # Reconstruction
+            outputs = self.model(batch_x)
+            # Compute reconstruction error
             score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
             score = score.detach().cpu().numpy()
             attens_energy.append(score)

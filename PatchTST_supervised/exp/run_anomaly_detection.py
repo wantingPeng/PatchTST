@@ -63,7 +63,7 @@ parser.add_argument('--moving_avg', type=int, default=25, help='window size of m
 
 # 优化器参数
 parser.add_argument('--batch_size', type=int, default=128, help='batch size')
-parser.add_argument('--learning_rate', type=float, default=0.001, help='optimizer learning rate')
+parser.add_argument('--learning_rate', type=float, default=0.01, help='optimizer learning rate')
 parser.add_argument('--des', type=str, default='test', help='exp description')
 parser.add_argument('--loss', type=str, default='mse', help='loss function')
 parser.add_argument('--lradj', type=str, default='type1', help='adjust learning rate')

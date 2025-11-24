@@ -234,7 +234,7 @@ def main():
     
     # Output file path (fixed to PatchTST_supervised/exp/find_best_results.json)
     script_dir = Path(__file__).parent
-    output_file = script_dir / 'find_best_results.json'
+    output_file = script_dir / 'find_best_results_patchtst.json'
     
     # ============================================================================
     

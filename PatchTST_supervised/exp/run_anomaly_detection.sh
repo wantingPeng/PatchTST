@@ -18,20 +18,20 @@ python -u exp/run_anomaly_detection.py \
       --is_training 1 \
       --test_only False \
       --data_path 'dataset/dataset/downsampleData_scratch_1minut/contact/contact_cleaned_1minut_20250928_172122.parquet' \
-      --model Autoformer \
+      --model PatchTST \
       --data custom \
       --features M \
-      --seq_len 100 \
-      --pred_len 100 \
+      --seq_len 150 \
+      --pred_len 150 \
       --enc_in 27 \
       --e_layers 3 \
-      --n_heads 8 \
+      --n_heads 4 \
       --d_model 256 \
       --d_ff 512 \
       --des 'Anomaly Detection' \
-      --train_epochs 1 \
+      --train_epochs 10 \
       --patience 3 \
       --batch_size 64 \
       --learning_rate 0.0001 \
       --kernel_size 25 \
-      --anormly_ratio 5.0 \
+      --anormly_ratio 3.0 \
