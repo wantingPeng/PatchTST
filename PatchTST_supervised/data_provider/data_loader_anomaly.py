@@ -49,20 +49,18 @@ class CustomLoader(object):
         val_df = df.iloc[train_end:val_end].copy()
         test_df = df.iloc[val_end:].copy()
 
-        # 统计原始比例（基于行级标签）
-        def _ratio(d):
-            if 'anomaly_label' in d.columns:
-                return float(d['anomaly_label'].sum()) / max(len(d), 1)
-            return float('nan')
 
-        orig_train_ratio = _ratio(train_df)
-        orig_val_ratio = _ratio(val_df)
-        orig_test_ratio = _ratio(test_df)
+        
+        # # 控制参数
+        # downsample = False  # 是否通过下采样调整异常比例到20%
+        # onlyNormalData = True  # 是否仅保留训练集中的正常数据（标签=0）
+        # use_pca = False # 是否使用PCA降维（仅在训练集上fit，对val/test仅transform）
+        # pca_n_components = 10  # PCA降维维度：整数=具体维度，0-1浮点数=保留方差比例，None=保留所有成分
         
         # 控制参数
         downsample = False  # 是否通过下采样调整异常比例到20%
         onlyNormalData = True  # 是否仅保留训练集中的正常数据（标签=0）
-        use_pca = True # 是否使用PCA降维（仅在训练集上fit，对val/test仅transform）
+        use_pca = False # 是否使用PCA降维（仅在训练集上fit，对val/test仅transform）
         pca_n_components = 10  # PCA降维维度：整数=具体维度，0-1浮点数=保留方差比例，None=保留所有成分
         
         # 参数冲突检查
@@ -153,19 +151,7 @@ class CustomLoader(object):
         print(f"测试集形状: {self.test.shape}")
         print(f"特征维度: {self.train.shape[1]}")
 
-        def _final_ratio(labels):
-            labels = np.asarray(labels)
-            denom = max(labels.shape[0], 1)
-            return float(labels.sum()) / denom
 
-        final_train_ratio = _final_ratio(train_df['anomaly_label'].values) if 'anomaly_label' in train_df.columns else float('nan')
-        final_val_ratio = _final_ratio(self.val_labels)
-        final_test_ratio = _final_ratio(self.test_labels)
-
-        print("异常比例（行级）:")
-        print(f"- 训练集: 原始 {orig_train_ratio*100 if not np.isnan(orig_train_ratio) else float('nan'):.2f}% -> 现有 {final_train_ratio*100 if not np.isnan(final_train_ratio) else float('nan'):.2f}%")
-        print(f"- 验证集: {final_val_ratio*100:.2f}%")
-        print(f"- 测试集: {final_test_ratio*100:.2f}%")
 
     def __len__(self):
         """
@@ -221,6 +207,7 @@ def get_anomaly_loader(data_path, batch_size, seq_len, step=1, mode='train', num
     )
     
     shuffle = mode == 'train'
+    #shuffle = False
     
     data_loader = DataLoader(
         dataset=dataset,

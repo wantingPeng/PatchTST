@@ -5,6 +5,7 @@ from utils.tools import adjust_learning_rate, adjustment
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import accuracy_score
 import torch.multiprocessing
+from metrics.metrics import *
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 import torch
@@ -334,7 +335,6 @@ class Exp_Anomaly_Detection(Exp_Basic):
         test_energy = np.array(attens_energy)
         combined_energy = np.concatenate([train_energy, test_energy], axis=0)
         threshold = np.percentile(combined_energy, 100 - self.args.anormly_ratio)
-        print("Threshold :", threshold)
 
         # (3) evaluation on the test set
         pred = (test_energy > threshold).astype(int)
@@ -343,6 +343,9 @@ class Exp_Anomaly_Detection(Exp_Basic):
         gt = test_labels.astype(int)
 
 
+        scores_simple = combine_all_evaluation_scores(pred, gt, test_energy)
+        for key, value in scores_simple.items():
+            print('{0:21} : {1:0.4f}'.format(key, value))
         # (4) detection adjustment
         gt, pred = adjustment(gt, pred)
 
@@ -369,6 +372,7 @@ class Exp_Anomaly_Detection(Exp_Basic):
             try:
                 result_payload = {
                     "threshold": float(threshold),
+                    "metrics": {k: float(v) for k, v in scores_simple.items()},
                     "summary": {
                         "accuracy": float(accuracy),
                         "precision": float(precision),
@@ -376,7 +380,10 @@ class Exp_Anomaly_Detection(Exp_Basic):
                         "f_score": float(f_score)
                     }
                 }
-                result_path = os.path.join(ckpt_dir, "result.json")
+                if self.args.test_only:
+                    result_path = os.path.join(ckpt_dir, "testresult.json")
+                else:
+                    result_path = os.path.join(ckpt_dir, "result.json")
                 with open(result_path, 'w', encoding='utf-8') as f:
                     json.dump(result_payload, f, ensure_ascii=False, indent=2)
                 print(f"Test results saved to: {result_path}")

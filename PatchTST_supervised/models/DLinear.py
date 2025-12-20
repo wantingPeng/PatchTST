@@ -53,22 +53,22 @@ class Model(nn.Module):
         self.channels = configs.enc_in
 
         if self.individual:
-            self.Linear_Residual = nn.ModuleList()
+            self.Linear_Seasonal = nn.ModuleList()
             self.Linear_Trend = nn.ModuleList()
             
             for i in range(self.channels):
-                self.Linear_Residual.append(nn.Linear(self.seq_len,self.pred_len))
+                self.Linear_Seasonal.append(nn.Linear(self.seq_len,self.pred_len))
                 self.Linear_Trend.append(nn.Linear(self.seq_len,self.pred_len))
 
                 # Use this two lines if you want to visualize the weights
-                # self.Linear_Residual[i].weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
+                # self.Linear_Seasonal[i].weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
                 # self.Linear_Trend[i].weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
         else:
-            self.Linear_Residual = nn.Linear(self.seq_len,self.pred_len)
+            self.Linear_Seasonal = nn.Linear(self.seq_len,self.pred_len)
             self.Linear_Trend = nn.Linear(self.seq_len,self.pred_len)
             
             # Use this two lines if you want to visualize the weights
-            # self.Linear_Residual.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
+            # self.Linear_Seasonal.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
             # self.Linear_Trend.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
 
     def forward(self, x):
@@ -79,10 +79,10 @@ class Model(nn.Module):
             residual_output = torch.zeros([residual_init.size(0),residual_init.size(1),self.pred_len],dtype=residual_init.dtype).to(residual_init.device)
             trend_output = torch.zeros([trend_init.size(0),trend_init.size(1),self.pred_len],dtype=trend_init.dtype).to(trend_init.device)
             for i in range(self.channels):
-                residual_output[:,i,:] = self.Linear_Residual[i](residual_init[:,i,:])
+                residual_output[:,i,:] = self.Linear_Seasonal[i](residual_init[:,i,:])
                 trend_output[:,i,:] = self.Linear_Trend[i](trend_init[:,i,:])
         else:
-            residual_output = self.Linear_Residual(residual_init)
+            residual_output = self.Linear_Seasonal(residual_init)
             trend_output = self.Linear_Trend(trend_init)
 
         x = residual_output + trend_output

@@ -22,10 +22,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # ============================================================================
 
 # Select which parameter to analyze (choose one: 'win_size', 'k', 'anormly_ratio')
-PARAM_TO_ANALYZE = 'patch_len'  # Change this to 'k' or 'anormly_ratio' for other analyses
+PARAM_TO_ANALYZE = 'kernel_size'  # Change this to 'k' or 'anormly_ratio' for other analyses
 
 # Datasets to test
-DATASETS = ['contact']
+DATASETS = ['pcb']
 
 # Parameter values to test (modify based on PARAM_TO_ANALYZE)
 # Note: n_heads must be divisors of d_model for Transformer models
@@ -37,7 +37,7 @@ PARAM_VALUES = {
     'patch_len': [10,16,22,28,34],
     # seq_len and pred_len should change together for anomaly detection (reconstruction task)
     'seq_len': [50,100,150,200,250,300],  # When analyzing seq_len, pred_len will be set to the same value
-    'kernel_size': [5,15,25,35,45,55,65,75,85],
+    'kernel_size': [25,35,45,55,65,75],
 }
 
 # Fixed parameters (used when not being analyzed)
@@ -52,17 +52,17 @@ FIXED_PARAMS = {
     'd_model': 256,
     'd_ff': 512,
     'kernel_size': 25,
-    'patch_len': 10,
-    'stride': 5,
+    'patch_len': 16,
+    'stride': 8,
     'anormly_ratio': 3.0,
-    'model': 'PatchTST',
+    'model': 'DLinear',
     'data': 'custom',
     'features': 'M',
     'des': 'Anomaly Detection'
 }
 
 # Output configuration
-OUTPUT_DIR = 'experiments/patchtst1'
+OUTPUT_DIR = 'experiments/results/dlinear_kernel_size_analysis'
 PLOT_STYLE = 'seaborn-v0_8-darkgrid'
 
 # ============================================================================
@@ -174,7 +174,7 @@ def run_single_experiment(dataset_name, param_name, param_value, fixed_params):
     # Then setting = PatchTST_custom_experiment_id
     # And path = checkpoints_n_heads_analysis/PatchTST_custom_experiment_id/
     
-    checkpoints_parent = f'checkpoints2_{param_name}_{params['model']}__pca'
+    checkpoints_parent = f'checkpoints4_{param_name}_{params['model']}'
     setting = f"{params['model']}_{params['data']}_{experiment_id}"
     model_save_path = os.path.join(checkpoints_parent, setting)
     
@@ -203,6 +203,7 @@ def run_single_experiment(dataset_name, param_name, param_value, fixed_params):
         '--d_ff', str(params['d_ff']),
         '--patch_len', str(params['patch_len']),
         '--stride', str(params['stride']),
+        '--kernel_size', str(params['kernel_size']),
         '--des', experiment_id,
         '--checkpoints', checkpoints_parent,
         '--lradj', 'type1'
@@ -531,7 +532,7 @@ def plot_only_mode(param_name):
 
 if __name__ == '__main__':
     # Set to True to only regenerate plots from existing results
-    PLOT_ONLY = False
+    PLOT_ONLY = True
     
     if PLOT_ONLY:
         plot_only_mode(PARAM_TO_ANALYZE)

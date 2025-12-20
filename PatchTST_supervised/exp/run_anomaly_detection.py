@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description='PatchTST for Anomaly Detection')
 # 基本配置
 parser.add_argument('--model', type=str, default='Informer', help='model name')
 parser.add_argument('--is_training', type=int, default=1, help='status')
-parser.add_argument('--test_only', type=bool, default=False, help='perform testing only')
+parser.add_argument('--test_only', type=lambda x: x.lower() == 'true', default=False, help='perform testing only')
 parser.add_argument('--checkpoint_dir', type=str, default='', help='checkpoint directory')
 # 数据加载器参数
 parser.add_argument('--data', type=str, default='custom', help='dataset type')
